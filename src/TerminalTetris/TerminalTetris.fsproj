@@ -6,6 +6,7 @@
   <ItemGroup>
     <Compile Include="GameGrid.fs" />
     <Compile Include="Draw.fs" />
+    <Compile Include="GameEngine.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
