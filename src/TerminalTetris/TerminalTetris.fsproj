@@ -4,7 +4,9 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Block.fs" />
     <Compile Include="GameGrid.fs" />
+    <Compile Include="Move.fs" />
     <Compile Include="Draw.fs" />
     <Compile Include="GameEngine.fs" />
     <Compile Include="Program.fs" />
