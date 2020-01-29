@@ -9,6 +9,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GameGridTests.fs" />
+    <Compile Include="MoveTests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
