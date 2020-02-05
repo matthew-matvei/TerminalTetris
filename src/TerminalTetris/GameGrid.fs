@@ -1,6 +1,5 @@
 module GameGrid
 
-
 type Grid =
     { Rows: Row.Row[]
       ActiveBlock: Option<Block.Block> }
