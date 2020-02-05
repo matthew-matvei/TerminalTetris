@@ -1,7 +1,6 @@
 module Block
 
-type Location = { X: int; Y: int }
-type Block = { Rows: Row.Row[]; Location: Location }
+type Block = { Rows: Row.Row[]; Location: Location.Location }
 type BlockType =
     | Square
 
