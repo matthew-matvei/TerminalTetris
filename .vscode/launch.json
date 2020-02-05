@@ -9,12 +9,11 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/src/TerminalTetris/bin/Debug/netcoreapp3.1/TerminalTetris.dll",
+            "program": "${workspaceFolder}/src/TerminalTetris/bin/Debug/netcoreapp2.1/TerminalTetris.dll",
             "args": [],
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
             "console": "internalConsole",
-            "requireExactSource": false
         }
     ]
 }
