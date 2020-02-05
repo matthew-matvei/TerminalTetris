@@ -1,8 +1,8 @@
 module GameGrid
 
-type private Row = bool[]
+
 type Grid =
-    { Rows: Row[]
+    { Rows: Row.Row[]
       ActiveBlock: Option<Block.Block> }
 
 let create numRows numColumns =
@@ -21,7 +21,7 @@ let activeBlockPresent (activeBlock: Block.Block option) rowIndex columnIndex =
             |> Option.bind (fun r -> Array.tryItem (columnIndex - activeBlock.Value.Location.X) r)
             |> Option.defaultValue false
 
-let private renderRow (activeBlock: Block.Block option) rowIndex (row: Row) =
+let private renderRow (activeBlock: Block.Block option) rowIndex (row: Row.Row) =
     Array.concat [
         [| "|" |]
         Array.mapi (fun columnIndex column -> if column || activeBlockPresent activeBlock rowIndex columnIndex then "X" else " ") row

@@ -30,7 +30,7 @@ let blockCanMove (gameGrid: GameGrid.Grid) =
 
                     blockCell && gameGridCellBelow
 
-                Option.map (fun (r: Block.Row) -> Seq.exists obstructionBelowCell (seq { 0 .. r.Length - 1 })) row 
+                Option.map (fun (r: Row.Row) -> Seq.exists obstructionBelowCell (seq { 0 .. r.Length - 1 })) row 
                     |> Option.defaultValue false
 
         let somethingBlocking = Seq.exists obstructionBelowRow (seq { 0 .. gameGrid.ActiveBlock.Value.Rows.Length - 1 })
