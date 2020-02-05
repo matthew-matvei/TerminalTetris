@@ -1,15 +1,14 @@
 module GameGrid
 
-type private Row = bool[]
 type Grid =
-    { Rows: Row[]
+    { Rows: Row.Row[]
       ActiveBlock: Option<Block.Block> }
 
 let create numRows numColumns =
     { Rows = Array.create numRows (Array.create numColumns false)
       ActiveBlock = Option<Block.Block>.None }
 
-let private copy gameGrid = { Rows = Array.copy gameGrid.Rows; ActiveBlock = gameGrid.ActiveBlock }
+let private copy gameGrid = { Rows = Array.map Row.copy gameGrid.Rows; ActiveBlock = gameGrid.ActiveBlock }
 let update gameGrid (updateFunction: Grid -> Grid) = copy gameGrid |> updateFunction
 let addBlock gameGrid (block: Block.Block) = { gameGrid with ActiveBlock = Some(block) }
 
@@ -17,11 +16,11 @@ let activeBlockPresent (activeBlock: Block.Block option) rowIndex columnIndex =
     if activeBlock.IsNone then
         false
     else
-        ArrayHelpers.tryGet activeBlock.Value.Rows (rowIndex - activeBlock.Value.Location.Y)
-        |> Option.bind (fun r -> ArrayHelpers.tryGet r (columnIndex - activeBlock.Value.Location.X))
-        |> Option.defaultValue false
+        Array.tryItem (rowIndex - activeBlock.Value.Location.Y) activeBlock.Value.Rows
+            |> Option.bind (fun r -> Array.tryItem (columnIndex - activeBlock.Value.Location.X) r)
+            |> Option.defaultValue false
 
-let private renderRow (activeBlock: Block.Block option) rowIndex (row: Row) =
+let private renderRow (activeBlock: Block.Block option) rowIndex (row: Row.Row) =
     Array.concat [
         [| "|" |]
         Array.mapi (fun columnIndex column -> if column || activeBlockPresent activeBlock rowIndex columnIndex then "X" else " ") row

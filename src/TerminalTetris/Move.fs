@@ -1,12 +1,14 @@
 module Move
 
-let getCellCoordinates (gameGrid: GameGrid.Grid) rowIndex =
-    let row = gameGrid.ActiveBlock.Value.Rows.[rowIndex]
-    Seq.where (fun columnIndex -> row.[columnIndex]) (seq { 0 .. row.Length - 1 })
-        |> Seq.map (fun columnIndex -> (rowIndex + gameGrid.ActiveBlock.Value.Location.Y, columnIndex + gameGrid.ActiveBlock.Value.Location.X))
+type Coordinate = { X: int; Y: int }
 
-let private setCellAtCoordinates (gameGrid: GameGrid.Grid) ((x, y): int * int) =
-    Array.set gameGrid.Rows.[y] x true
+let private getCellCoordinates (activeBlock: Block.Block) rowIndex =
+    let row = activeBlock.Rows.[rowIndex]
+    Seq.where (fun columnIndex -> row.[columnIndex]) (seq { 0 .. row.Length - 1 })
+        |> Seq.map (fun columnIndex -> { Y = rowIndex + activeBlock.Location.Y; X = columnIndex + activeBlock.Location.X })
+
+let private setCellAtCoordinates (gameGrid: GameGrid.Grid) (coords: Coordinate) =
+    Array.set gameGrid.Rows.[coords.Y] coords.X true
 
 let blockCanMove (gameGrid: GameGrid.Grid) =
     if gameGrid.ActiveBlock.IsNone then
@@ -14,25 +16,32 @@ let blockCanMove (gameGrid: GameGrid.Grid) =
     else
         let startingY = gameGrid.ActiveBlock.Value.Location.Y
 
-        let immovableRow rowIndex =
+        let obstructionBelowRow rowIndex =
             if gameGrid.Rows.Length <= startingY + rowIndex + 1 then
                 true
             else
-                let row = gameGrid.Rows.[rowIndex]
-                let immovableCell columnIndex =
-                    let blockCell = row.[columnIndex]
-                    let nextGameGridCell = gameGrid.Rows.[startingY + rowIndex + 1].[columnIndex]
-                    blockCell && nextGameGridCell
+                let row = Array.tryItem rowIndex gameGrid.ActiveBlock.Value.Rows 
+                let obstructionBelowCell columnIndex =
+                    let blockCell = Option.bind (fun r -> Array.tryItem columnIndex r) row |> Option.defaultValue false
+                    let gameGridCellBelow =
+                        Array.tryItem (startingY + rowIndex + 1) gameGrid.Rows
+                        |> Option.bind (fun r -> Array.tryItem columnIndex r)
+                        |> Option.defaultValue false
 
-                Seq.exists immovableCell (seq { 0 .. row.Length - 1 })
+                    blockCell && gameGridCellBelow
 
-        Seq.exists immovableRow (seq { 0 .. gameGrid.Rows.Length - 1 })
+                Option.map (fun (r: Row.Row) -> Seq.exists obstructionBelowCell (seq { 0 .. r.Length - 1 })) row 
+                    |> Option.defaultValue false
+
+        let somethingBlocking = Seq.exists obstructionBelowRow (seq { 0 .. gameGrid.ActiveBlock.Value.Rows.Length - 1 })
+
+        not somethingBlocking
 
 let private fuseBlockWithGrid (gameGrid: GameGrid.Grid) =
     if gameGrid.ActiveBlock.IsNone then
         gameGrid
     else
-        let cellCoordinates = Seq.collect (fun rowIndex -> getCellCoordinates gameGrid rowIndex) (seq { 0 .. gameGrid.ActiveBlock.Value.Rows.Length - 1 })
+        let cellCoordinates = Seq.collect (fun rowIndex -> getCellCoordinates gameGrid.ActiveBlock.Value rowIndex) (seq { 0 .. gameGrid.ActiveBlock.Value.Rows.Length - 1 })
         for coords in cellCoordinates do
             setCellAtCoordinates gameGrid coords
 
