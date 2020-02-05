@@ -2,7 +2,7 @@ module Move
 
 type Coordinate = { X: int; Y: int }
 
-let getCellCoordinates (activeBlock: Block.Block) rowIndex =
+let private getCellCoordinates (activeBlock: Block.Block) rowIndex =
     let row = activeBlock.Rows.[rowIndex]
     Seq.where (fun columnIndex -> row.[columnIndex]) (seq { 0 .. row.Length - 1 })
         |> Seq.map (fun columnIndex -> { Y = rowIndex + activeBlock.Location.Y; X = columnIndex + activeBlock.Location.X })
