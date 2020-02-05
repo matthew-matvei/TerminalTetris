@@ -17,9 +17,9 @@ let activeBlockPresent (activeBlock: Block.Block option) rowIndex columnIndex =
     if activeBlock.IsNone then
         false
     else
-        ArrayHelpers.tryGet activeBlock.Value.Rows (rowIndex - activeBlock.Value.Location.Y)
-        |> Option.bind (fun r -> ArrayHelpers.tryGet r (columnIndex - activeBlock.Value.Location.X))
-        |> Option.defaultValue false
+        Array.tryItem (rowIndex - activeBlock.Value.Location.Y) activeBlock.Value.Rows
+            |> Option.bind (fun r -> Array.tryItem (columnIndex - activeBlock.Value.Location.X) r)
+            |> Option.defaultValue false
 
 let private renderRow (activeBlock: Block.Block option) rowIndex (row: Row) =
     Array.concat [
