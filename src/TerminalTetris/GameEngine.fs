@@ -10,4 +10,4 @@ let run (tick: unit -> unit) =
 
 let waitForKey (keyPressHandler: ConsoleKeyInfo -> unit) =
     while true do
-        Console.ReadKey() |> keyPressHandler 
+        Console.ReadKey() |> keyPressHandler

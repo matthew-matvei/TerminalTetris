@@ -4,4 +4,3 @@ type Direction =
     | Left
     | Right
     | Down
-    

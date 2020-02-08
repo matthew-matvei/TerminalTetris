@@ -45,4 +45,3 @@ let blockLeft (gameGrid: GameGrid.Grid) =
         { gameGrid with ActiveBlock = Some(Block.move Direction.Left gameGrid.ActiveBlock.Value) }
     else
         gameGrid
-        
