@@ -6,6 +6,7 @@
   <ItemGroup>
     <Compile Include="Location.fs" />
     <Compile Include="Row.fs" />
+    <Compile Include="Direction.fs" />
     <Compile Include="Block.fs" />
     <Compile Include="GameGrid.fs" />
     <Compile Include="Move.fs" />
