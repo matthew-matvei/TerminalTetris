@@ -32,3 +32,6 @@ let blockDown (gameGrid: GameGrid.Grid) =
         GameGrid.addBlock gameGrid (Block.create Block.Square)
     else
         moveBlockDown gameGrid
+
+let blockRight (gameGrid: GameGrid.Grid) =
+    failwith "Not implemented"
