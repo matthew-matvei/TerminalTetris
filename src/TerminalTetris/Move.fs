@@ -34,4 +34,22 @@ let blockDown (gameGrid: GameGrid.Grid) =
         moveBlockDown gameGrid
 
 let blockRight (gameGrid: GameGrid.Grid) =
-    failwith "Not implemented"
+    if gameGrid.ActiveBlock.IsNone then
+        gameGrid
+    else if GameGrid.blockCanMoveRight gameGrid then
+        { gameGrid with ActiveBlock = Some({
+            gameGrid.ActiveBlock.Value with Location = {
+                gameGrid.ActiveBlock.Value.Location with X = gameGrid.ActiveBlock.Value.Location.X + 1 } })}
+    else
+        gameGrid
+
+let blockLeft (gameGrid: GameGrid.Grid) =
+    if gameGrid.ActiveBlock.IsNone then
+        gameGrid
+    else if GameGrid.blockCanMoveLeft gameGrid then
+        { gameGrid with ActiveBlock = Some({
+            gameGrid.ActiveBlock.Value with Location = {
+                gameGrid.ActiveBlock.Value.Location with X = gameGrid.ActiveBlock.Value.Location.X - 1 } })}
+    else
+        gameGrid
+        

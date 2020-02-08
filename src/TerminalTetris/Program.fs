@@ -7,11 +7,11 @@ let main _ =
     let (numRows, numColumns) = (10, 5)
     let mutable gameGrid = GameGrid.create numRows numColumns
 
-    let updateGrid () =
-        gameGrid <- GameGrid.update gameGrid Move.blockDown
+    let updateGrid (gameGridUpdater) =
+        gameGrid <- GameGrid.update gameGrid gameGridUpdater
         GameGrid.render gameGrid |> Draw.matrix
 
-    GameEngine.run updateGrid
-    GameEngine.waitForKey (fun keyInfo -> Keys.applyKeyEvent keyInfo gameGrid)
+    GameEngine.run (fun _ -> updateGrid Move.blockDown)
+    GameEngine.waitForKey (Keys.applyKeyEvent >> updateGrid)
 
     exitCode

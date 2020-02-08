@@ -1,7 +1,6 @@
 module GameEngine
 
 open System
-open System.Reactive.Linq
 
 let run (tick: unit -> unit) =
     let timer = new Timers.Timer(2000.0)
