@@ -1,13 +1,13 @@
 module GameEngine
 
 open System
-open System.Reactive.Linq
 
-let run (updateGrid: int64 -> unit) =
-    let timer = Observable.Interval(TimeSpan.FromSeconds(2.0))
-    use subscription = timer.Subscribe(updateGrid)
+let run (tick: unit -> unit) =
+    let timer = new Timers.Timer(2000.0)
+    timer.Elapsed.Add(fun _ -> tick())
+    timer.AutoReset <- true
+    timer.Enabled <- true
 
-    let publishedLoop = timer.Publish()
-
-    publishedLoop.Connect() |> ignore
-    publishedLoop.Wait() |> ignore
+let waitForKey (keyPressHandler: ConsoleKeyInfo -> unit) =
+    while true do
+        Console.ReadKey() |> keyPressHandler

@@ -20,10 +20,7 @@ let private fuseBlockWithGrid (gameGrid: GameGrid.Grid) =
 
 let private moveBlockDown gameGrid =
     if GameGrid.activeBlockCanMove gameGrid then
-        {
-            gameGrid with ActiveBlock = Some({
-                gameGrid.ActiveBlock.Value with Location = {
-                    gameGrid.ActiveBlock.Value.Location with Y = gameGrid.ActiveBlock.Value.Location.Y + 1 }})}
+        { gameGrid with ActiveBlock = Some(Block.move Direction.Down gameGrid.ActiveBlock.Value) }
     else
         fuseBlockWithGrid gameGrid
 
@@ -32,3 +29,19 @@ let blockDown (gameGrid: GameGrid.Grid) =
         GameGrid.addBlock gameGrid (Block.create Block.Square)
     else
         moveBlockDown gameGrid
+
+let blockRight (gameGrid: GameGrid.Grid) =
+    if gameGrid.ActiveBlock.IsNone then
+        gameGrid
+    else if GameGrid.blockCanMoveRight gameGrid then
+        { gameGrid with ActiveBlock = Some(Block.move Direction.Right gameGrid.ActiveBlock.Value) }
+    else
+        gameGrid
+
+let blockLeft (gameGrid: GameGrid.Grid) =
+    if gameGrid.ActiveBlock.IsNone then
+        gameGrid
+    else if GameGrid.blockCanMoveLeft gameGrid then
+        { gameGrid with ActiveBlock = Some(Block.move Direction.Left gameGrid.ActiveBlock.Value) }
+    else
+        gameGrid

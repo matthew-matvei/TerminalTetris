@@ -11,3 +11,9 @@ let private createSquare _ =
 let create blockType =
     match blockType with
     | Square -> createSquare()
+
+let move (direction: Direction.Direction) (block: Block) =
+    match direction with
+    | Direction.Left -> { block with Location = { Y = block.Location.Y; X = block.Location.X - 1 }}
+    | Direction.Right -> { block with Location = { Y = block.Location.Y; X = block.Location.X + 1}}
+    | Direction.Down -> { block with Location = { X = block.Location.X; Y = block.Location.Y + 1 }}

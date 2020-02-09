@@ -59,3 +59,31 @@ let activeBlockCanMove (gameGrid: Grid) =
         let somethingBlocking = Seq.exists obstructionBelowRow (seq { 0 .. gameGrid.ActiveBlock.Value.Rows.Length - 1 })
 
         not somethingBlocking
+
+let blockCanMoveRight (gameGrid: Grid) =
+    if gameGrid.ActiveBlock.IsNone then
+        false
+    else
+        let gridWidth = Seq.tryItem 0 gameGrid.Rows |> Option.map Seq.length |> Option.defaultValue 0
+        let blockWidth = Seq.tryItem 0 gameGrid.ActiveBlock.Value.Rows |> Option.map Seq.length |> Option.defaultValue 0
+        let startingX = gameGrid.ActiveBlock.Value.Location.X
+
+        let obstructionToRight (row: Row.Row) =
+            let rightMostCell = Seq.tryLast row |> Option.defaultValue false
+                
+            rightMostCell && startingX + blockWidth >= gridWidth
+
+        not (Seq.exists obstructionToRight gameGrid.ActiveBlock.Value.Rows)
+
+let blockCanMoveLeft (gameGrid: Grid) =
+    if gameGrid.ActiveBlock.IsNone then
+        false
+    else
+        let startingX = gameGrid.ActiveBlock.Value.Location.X
+
+        let obstructionToLeft (row: Row.Row) =
+            let leftMostCell = Seq.tryItem 0 row |> Option.defaultValue false
+
+            leftMostCell && startingX <= 0
+
+        not (Seq.exists obstructionToLeft gameGrid.ActiveBlock.Value.Rows)

@@ -6,14 +6,13 @@
   <ItemGroup>
     <Compile Include="Location.fs" />
     <Compile Include="Row.fs" />
+    <Compile Include="Direction.fs" />
     <Compile Include="Block.fs" />
     <Compile Include="GameGrid.fs" />
     <Compile Include="Move.fs" />
+    <Compile Include="Keys.fs" />
     <Compile Include="Draw.fs" />
     <Compile Include="GameEngine.fs" />
     <Compile Include="Program.fs" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="System.Reactive" Version="4.1.5" />
   </ItemGroup>
 </Project>
