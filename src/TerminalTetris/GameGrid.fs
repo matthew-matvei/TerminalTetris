@@ -33,7 +33,35 @@ let render grid =
         [| Array.create (grid.Rows.[0].Length + 2) "=" |]
     ]
 
-let activeBlockCanMove (gameGrid: Grid) =
+let private blockCanMoveLeft (gameGrid: Grid) =
+    if gameGrid.ActiveBlock.IsNone then
+        false
+    else
+        let startingX = gameGrid.ActiveBlock.Value.Location.X
+
+        let obstructionToLeft (row: Row.Row) =
+            let leftMostCell = Seq.tryItem 0 row |> Option.defaultValue false
+
+            leftMostCell && startingX <= 0
+
+        not (Seq.exists obstructionToLeft gameGrid.ActiveBlock.Value.Rows)
+
+let private blockCanMoveRight (gameGrid: Grid) =
+    if gameGrid.ActiveBlock.IsNone then
+        false
+    else
+        let gridWidth = Seq.tryItem 0 gameGrid.Rows |> Option.map Seq.length |> Option.defaultValue 0
+        let blockWidth = Seq.tryItem 0 gameGrid.ActiveBlock.Value.Rows |> Option.map Seq.length |> Option.defaultValue 0
+        let startingX = gameGrid.ActiveBlock.Value.Location.X
+
+        let obstructionToRight (row: Row.Row) =
+            let rightMostCell = Seq.tryLast row |> Option.defaultValue false
+                
+            rightMostCell && startingX + blockWidth >= gridWidth
+
+        not (Seq.exists obstructionToRight gameGrid.ActiveBlock.Value.Rows)
+
+let private blockCanMoveDown (gameGrid: Grid) =
     if gameGrid.ActiveBlock.IsNone then
         false
     else
@@ -60,30 +88,8 @@ let activeBlockCanMove (gameGrid: Grid) =
 
         not somethingBlocking
 
-let blockCanMoveRight (gameGrid: Grid) =
-    if gameGrid.ActiveBlock.IsNone then
-        false
-    else
-        let gridWidth = Seq.tryItem 0 gameGrid.Rows |> Option.map Seq.length |> Option.defaultValue 0
-        let blockWidth = Seq.tryItem 0 gameGrid.ActiveBlock.Value.Rows |> Option.map Seq.length |> Option.defaultValue 0
-        let startingX = gameGrid.ActiveBlock.Value.Location.X
-
-        let obstructionToRight (row: Row.Row) =
-            let rightMostCell = Seq.tryLast row |> Option.defaultValue false
-                
-            rightMostCell && startingX + blockWidth >= gridWidth
-
-        not (Seq.exists obstructionToRight gameGrid.ActiveBlock.Value.Rows)
-
-let blockCanMoveLeft (gameGrid: Grid) =
-    if gameGrid.ActiveBlock.IsNone then
-        false
-    else
-        let startingX = gameGrid.ActiveBlock.Value.Location.X
-
-        let obstructionToLeft (row: Row.Row) =
-            let leftMostCell = Seq.tryItem 0 row |> Option.defaultValue false
-
-            leftMostCell && startingX <= 0
-
-        not (Seq.exists obstructionToLeft gameGrid.ActiveBlock.Value.Rows)
+let activeBlockCanMove (gameGrid: Grid) (direction: Direction.Direction) =
+    match direction with
+    | Direction.Left -> blockCanMoveLeft gameGrid
+    | Direction.Right -> blockCanMoveRight gameGrid
+    | Direction.Down -> blockCanMoveDown gameGrid
