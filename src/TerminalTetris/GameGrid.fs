@@ -12,26 +12,26 @@ let private copy gameGrid = { Rows = Array.map Row.copy gameGrid.Rows; ActiveBlo
 let update gameGrid (updateFunction: Grid -> Grid) = copy gameGrid |> updateFunction
 let addBlock gameGrid block = { gameGrid with ActiveBlock = Some(block) }
 
-let private activeBlockPresent (activeBlock: Block.Block option) rowIndex columnIndex =
+let private activeBlockPresent (activeBlock: Block.Block option) (gameGridLocation: Location.Location) =
     if activeBlock.IsNone then
         false
     else
-        Array.tryItem (rowIndex - activeBlock.Value.Location.Y) activeBlock.Value.Rows
-            |> Option.bind (fun r -> Array.tryItem (columnIndex - activeBlock.Value.Location.X) r)
+        Array.tryItem (gameGridLocation.Y - activeBlock.Value.Location.Y) activeBlock.Value.Rows
+            |> Option.bind (fun r -> Array.tryItem (gameGridLocation.X - activeBlock.Value.Location.X) r)
             |> Option.defaultValue false
 
-let private gameGridBlockPresent (gameGrid: Grid) rowIndex columnIndex =
-    if activeBlockPresent gameGrid.ActiveBlock rowIndex columnIndex then
+let private gameGridBlockPresent (gameGrid: Grid) (gameGridLocation: Location.Location) =
+    if activeBlockPresent gameGrid.ActiveBlock gameGridLocation then
         false
     else
-        Array.tryItem rowIndex gameGrid.Rows
-            |> Option.bind (Array.tryItem columnIndex)
+        Array.tryItem gameGridLocation.Y gameGrid.Rows
+            |> Option.bind (Array.tryItem gameGridLocation.X)
             |> Option.defaultValue false
 
 let private renderRow (activeBlock: Block.Block option) rowIndex row =
     Array.concat [
         [| "|" |]
-        Array.mapi (fun columnIndex column -> if column || activeBlockPresent activeBlock rowIndex columnIndex then "X" else " ") row
+        Array.mapi (fun columnIndex column -> if column || activeBlockPresent activeBlock { Y = rowIndex; X = columnIndex } then "X" else " ") row
         [| "|" |]
     ]
 
@@ -54,8 +54,8 @@ let private blockCanMoveLeft (gameGrid: Grid) =
                 true
             else
                 let obstructionToLeftOfCell rowIndex =
-                    activeBlockPresent gameGrid.ActiveBlock (startingY + rowIndex) (startingX + columnIndex)
-                        && gameGridBlockPresent gameGrid (startingY + rowIndex) (startingX + columnIndex - 1)
+                    activeBlockPresent gameGrid.ActiveBlock { Y = startingY + rowIndex; X = startingX + columnIndex }
+                        && gameGridBlockPresent gameGrid { Y = startingY + rowIndex; X = startingX + columnIndex - 1 }
 
                 Seq.exists obstructionToLeftOfCell (seq { 0 .. gameGrid.ActiveBlock.Value.Rows.Length - 1 })
 
@@ -75,8 +75,8 @@ let private blockCanMoveRight (gameGrid: Grid) =
                 true
             else
                 let obstructionToRightOfCell rowIndex =
-                    activeBlockPresent gameGrid.ActiveBlock (startingY + rowIndex) (startingX + columnIndex)
-                        && gameGridBlockPresent gameGrid (startingY + rowIndex) (startingX + columnIndex + 1)
+                    activeBlockPresent gameGrid.ActiveBlock { Y = startingY + rowIndex; X = startingX + columnIndex }
+                        && gameGridBlockPresent gameGrid { Y = startingY + rowIndex; X = startingX + columnIndex + 1 }
 
                 Seq.exists obstructionToRightOfCell (seq { 0 .. gameGrid.ActiveBlock.Value.Rows.Length - 1 })
 
@@ -95,8 +95,8 @@ let private blockCanMoveDown (gameGrid: Grid) =
             else
                 let row = Array.tryItem rowIndex gameGrid.ActiveBlock.Value.Rows |> Option.defaultValue Array.empty
                 let obstructionBelowCell columnIndex =
-                    activeBlockPresent gameGrid.ActiveBlock (startingY + rowIndex) (startingX + columnIndex)
-                        && gameGridBlockPresent gameGrid (startingY + rowIndex + 1) (startingX + columnIndex)
+                    activeBlockPresent gameGrid.ActiveBlock { Y = startingY + rowIndex; X = startingX + columnIndex }
+                        && gameGridBlockPresent gameGrid { Y = startingY + rowIndex + 1; X = startingX + columnIndex }
 
                 Seq.exists obstructionBelowCell (seq { 0 .. row.Length - 1 })
 
