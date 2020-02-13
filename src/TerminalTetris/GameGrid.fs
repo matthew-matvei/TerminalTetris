@@ -12,18 +12,26 @@ let private copy gameGrid = { Rows = Array.map Row.copy gameGrid.Rows; ActiveBlo
 let update gameGrid (updateFunction: Grid -> Grid) = copy gameGrid |> updateFunction
 let addBlock gameGrid block = { gameGrid with ActiveBlock = Some(block) }
 
-let activeBlockPresent (activeBlock: Block.Block option) rowIndex columnIndex =
+let private activeBlockPresent (activeBlock: Block.Block option) (gameGridLocation: Location.Location) =
     if activeBlock.IsNone then
         false
     else
-        Array.tryItem (rowIndex - activeBlock.Value.Location.Y) activeBlock.Value.Rows
-            |> Option.bind (fun r -> Array.tryItem (columnIndex - activeBlock.Value.Location.X) r)
+        Array.tryItem (gameGridLocation.Y - activeBlock.Value.Location.Y) activeBlock.Value.Rows
+            |> Option.bind (fun r -> Array.tryItem (gameGridLocation.X - activeBlock.Value.Location.X) r)
+            |> Option.defaultValue false
+
+let private gameGridBlockPresent (gameGrid: Grid) (gameGridLocation: Location.Location) =
+    if activeBlockPresent gameGrid.ActiveBlock gameGridLocation then
+        false
+    else
+        Array.tryItem gameGridLocation.Y gameGrid.Rows
+            |> Option.bind (Array.tryItem gameGridLocation.X)
             |> Option.defaultValue false
 
 let private renderRow (activeBlock: Block.Block option) rowIndex row =
     Array.concat [
         [| "|" |]
-        Array.mapi (fun columnIndex column -> if column || activeBlockPresent activeBlock rowIndex columnIndex then "X" else " ") row
+        Array.mapi (fun columnIndex column -> if column || activeBlockPresent activeBlock { Y = rowIndex; X = columnIndex } then "X" else " ") row
         [| "|" |]
     ]
 
@@ -38,28 +46,41 @@ let private blockCanMoveLeft (gameGrid: Grid) =
         false
     else
         let startingX = gameGrid.ActiveBlock.Value.Location.X
+        let startingY = gameGrid.ActiveBlock.Value.Location.Y
+        let firstActiveBlockRow = Seq.tryHead gameGrid.ActiveBlock.Value.Rows |> Option.defaultValue Array.empty
 
-        let obstructionToLeft (row: Row.Row) =
-            let leftMostCell = Seq.tryItem 0 row |> Option.defaultValue false
+        let obstructionToLeftOfColumn columnIndex =
+            if startingX + columnIndex = 0 then
+                true
+            else
+                let obstructionToLeftOfCell rowIndex =
+                    activeBlockPresent gameGrid.ActiveBlock { Y = startingY + rowIndex; X = startingX + columnIndex }
+                        && gameGridBlockPresent gameGrid { Y = startingY + rowIndex; X = startingX + columnIndex - 1 }
 
-            leftMostCell && startingX <= 0
+                Seq.exists obstructionToLeftOfCell (seq { 0 .. gameGrid.ActiveBlock.Value.Rows.Length - 1 })
 
-        not (Seq.exists obstructionToLeft gameGrid.ActiveBlock.Value.Rows)
+        not (Seq.exists obstructionToLeftOfColumn (seq { 0 .. firstActiveBlockRow.Length - 1 }))
 
 let private blockCanMoveRight (gameGrid: Grid) =
     if gameGrid.ActiveBlock.IsNone then
         false
     else
-        let gridWidth = Seq.tryItem 0 gameGrid.Rows |> Option.map Seq.length |> Option.defaultValue 0
-        let blockWidth = Seq.tryItem 0 gameGrid.ActiveBlock.Value.Rows |> Option.map Seq.length |> Option.defaultValue 0
         let startingX = gameGrid.ActiveBlock.Value.Location.X
+        let startingY = gameGrid.ActiveBlock.Value.Location.Y
+        let firstRow = Seq.tryHead gameGrid.Rows |> Option.defaultValue Array.empty
+        let firstActiveBlockRow = Seq.tryHead gameGrid.ActiveBlock.Value.Rows |> Option.defaultValue Array.empty
 
-        let obstructionToRight (row: Row.Row) =
-            let rightMostCell = Seq.tryLast row |> Option.defaultValue false
-                
-            rightMostCell && startingX + blockWidth >= gridWidth
+        let obstructionToRightOfColumn columnIndex =
+            if firstRow.Length <= startingX + columnIndex + 1 then
+                true
+            else
+                let obstructionToRightOfCell rowIndex =
+                    activeBlockPresent gameGrid.ActiveBlock { Y = startingY + rowIndex; X = startingX + columnIndex }
+                        && gameGridBlockPresent gameGrid { Y = startingY + rowIndex; X = startingX + columnIndex + 1 }
 
-        not (Seq.exists obstructionToRight gameGrid.ActiveBlock.Value.Rows)
+                Seq.exists obstructionToRightOfCell (seq { 0 .. gameGrid.ActiveBlock.Value.Rows.Length - 1 })
+
+        not (Seq.exists obstructionToRightOfColumn (seq { 0 .. firstActiveBlockRow.Length - 1 }))
 
 let private blockCanMoveDown (gameGrid: Grid) =
     if gameGrid.ActiveBlock.IsNone then
@@ -72,18 +93,12 @@ let private blockCanMoveDown (gameGrid: Grid) =
             if gameGrid.Rows.Length <= startingY + rowIndex + 1 then
                 true
             else
-                let row = Array.tryItem rowIndex gameGrid.ActiveBlock.Value.Rows 
+                let row = Array.tryItem rowIndex gameGrid.ActiveBlock.Value.Rows |> Option.defaultValue Array.empty
                 let obstructionBelowCell columnIndex =
-                    let blockCell = Option.bind (fun r -> Array.tryItem columnIndex r) row |> Option.defaultValue false
-                    let gameGridCellBelow =
-                        Array.tryItem (startingY + rowIndex + 1) gameGrid.Rows
-                        |> Option.bind (fun r -> Array.tryItem (startingX + columnIndex) r)
-                        |> Option.defaultValue false
+                    activeBlockPresent gameGrid.ActiveBlock { Y = startingY + rowIndex; X = startingX + columnIndex }
+                        && gameGridBlockPresent gameGrid { Y = startingY + rowIndex + 1; X = startingX + columnIndex }
 
-                    blockCell && gameGridCellBelow
-
-                Option.map (fun (r: Row.Row) -> Seq.exists obstructionBelowCell (seq { 0 .. r.Length - 1 })) row 
-                    |> Option.defaultValue false
+                Seq.exists obstructionBelowCell (seq { 0 .. row.Length - 1 })
 
         not (Seq.exists obstructionBelowRow (seq { 0 .. gameGrid.ActiveBlock.Value.Rows.Length - 1 }))
 
