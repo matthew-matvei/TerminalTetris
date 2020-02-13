@@ -58,16 +58,22 @@ let private blockCanMoveRight (gameGrid: Grid) =
     if gameGrid.ActiveBlock.IsNone then
         false
     else
-        let gridWidth = Seq.tryItem 0 gameGrid.Rows |> Option.map Seq.length |> Option.defaultValue 0
-        let blockWidth = Seq.tryItem 0 gameGrid.ActiveBlock.Value.Rows |> Option.map Seq.length |> Option.defaultValue 0
         let startingX = gameGrid.ActiveBlock.Value.Location.X
+        let startingY = gameGrid.ActiveBlock.Value.Location.Y
+        let firstRow = Seq.tryHead gameGrid.Rows |> Option.defaultValue Array.empty
+        let firstActiveBlockRow = Seq.tryHead gameGrid.ActiveBlock.Value.Rows |> Option.defaultValue Array.empty
 
-        let obstructionToRight (row: Row.Row) =
-            let rightMostCell = Seq.tryLast row |> Option.defaultValue false
-                
-            rightMostCell && startingX + blockWidth >= gridWidth
+        let obstructionToRightOfColumn columnIndex =
+            if firstRow.Length <= startingX + columnIndex + 1 then
+                true
+            else
+                let obstructionToRightOfCell rowIndex =
+                    activeBlockPresent gameGrid.ActiveBlock (startingY + rowIndex) (startingX + columnIndex)
+                        && gameGridBlockPresent gameGrid (startingY + rowIndex) (startingX + columnIndex + 1)
 
-        not (Seq.exists obstructionToRight gameGrid.ActiveBlock.Value.Rows)
+                Seq.exists obstructionToRightOfCell (seq { 0 .. gameGrid.ActiveBlock.Value.Rows.Length - 1 })
+
+        not (Seq.exists obstructionToRightOfColumn (seq { 0 .. firstActiveBlockRow.Length - 1 }))
 
 let private blockCanMoveDown (gameGrid: Grid) =
     if gameGrid.ActiveBlock.IsNone then
@@ -80,13 +86,12 @@ let private blockCanMoveDown (gameGrid: Grid) =
             if gameGrid.Rows.Length <= startingY + rowIndex + 1 then
                 true
             else
-                let row = Array.tryItem rowIndex gameGrid.ActiveBlock.Value.Rows 
+                let row = Array.tryItem rowIndex gameGrid.ActiveBlock.Value.Rows |> Option.defaultValue Array.empty
                 let obstructionBelowCell columnIndex =
                     activeBlockPresent gameGrid.ActiveBlock (startingY + rowIndex) (startingX + columnIndex)
                         && gameGridBlockPresent gameGrid (startingY + rowIndex + 1) (startingX + columnIndex)
 
-                Option.map (fun (r: Row.Row) -> Seq.exists obstructionBelowCell (seq { 0 .. r.Length - 1 })) row 
-                    |> Option.defaultValue false
+                Seq.exists obstructionBelowCell (seq { 0 .. row.Length - 1 })
 
         not (Seq.exists obstructionBelowRow (seq { 0 .. gameGrid.ActiveBlock.Value.Rows.Length - 1 }))
 
