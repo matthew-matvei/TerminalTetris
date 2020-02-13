@@ -19,7 +19,7 @@ let private fuseBlockWithGrid (gameGrid: GameGrid.Grid) =
         { gameGrid with ActiveBlock = Option<Block.Block>.None }
 
 let private moveBlockDown gameGrid =
-    if GameGrid.activeBlockCanMove gameGrid then
+    if GameGrid.activeBlockCanMove gameGrid Direction.Down then
         { gameGrid with ActiveBlock = Some(Block.move Direction.Down gameGrid.ActiveBlock.Value) }
     else
         fuseBlockWithGrid gameGrid
@@ -33,7 +33,7 @@ let blockDown (gameGrid: GameGrid.Grid) =
 let blockRight (gameGrid: GameGrid.Grid) =
     if gameGrid.ActiveBlock.IsNone then
         gameGrid
-    else if GameGrid.blockCanMoveRight gameGrid then
+    else if GameGrid.activeBlockCanMove gameGrid Direction.Right then
         { gameGrid with ActiveBlock = Some(Block.move Direction.Right gameGrid.ActiveBlock.Value) }
     else
         gameGrid
@@ -41,7 +41,7 @@ let blockRight (gameGrid: GameGrid.Grid) =
 let blockLeft (gameGrid: GameGrid.Grid) =
     if gameGrid.ActiveBlock.IsNone then
         gameGrid
-    else if GameGrid.blockCanMoveLeft gameGrid then
+    else if GameGrid.activeBlockCanMove gameGrid Direction.Left then
         { gameGrid with ActiveBlock = Some(Block.move Direction.Left gameGrid.ActiveBlock.Value) }
     else
         gameGrid

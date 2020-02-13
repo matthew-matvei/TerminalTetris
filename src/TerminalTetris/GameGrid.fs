@@ -33,34 +33,20 @@ let render grid =
         [| Array.create (grid.Rows.[0].Length + 2) "=" |]
     ]
 
-let activeBlockCanMove (gameGrid: Grid) =
+let private blockCanMoveLeft (gameGrid: Grid) =
     if gameGrid.ActiveBlock.IsNone then
         false
     else
-        let startingY = gameGrid.ActiveBlock.Value.Location.Y
+        let startingX = gameGrid.ActiveBlock.Value.Location.X
 
-        let obstructionBelowRow rowIndex =
-            if gameGrid.Rows.Length <= startingY + rowIndex + 1 then
-                true
-            else
-                let row = Array.tryItem rowIndex gameGrid.ActiveBlock.Value.Rows 
-                let obstructionBelowCell columnIndex =
-                    let blockCell = Option.bind (fun r -> Array.tryItem columnIndex r) row |> Option.defaultValue false
-                    let gameGridCellBelow =
-                        Array.tryItem (startingY + rowIndex + 1) gameGrid.Rows
-                        |> Option.bind (fun r -> Array.tryItem columnIndex r)
-                        |> Option.defaultValue false
+        let obstructionToLeft (row: Row.Row) =
+            let leftMostCell = Seq.tryItem 0 row |> Option.defaultValue false
 
-                    blockCell && gameGridCellBelow
+            leftMostCell && startingX <= 0
 
-                Option.map (fun (r: Row.Row) -> Seq.exists obstructionBelowCell (seq { 0 .. r.Length - 1 })) row 
-                    |> Option.defaultValue false
+        not (Seq.exists obstructionToLeft gameGrid.ActiveBlock.Value.Rows)
 
-        let somethingBlocking = Seq.exists obstructionBelowRow (seq { 0 .. gameGrid.ActiveBlock.Value.Rows.Length - 1 })
-
-        not somethingBlocking
-
-let blockCanMoveRight (gameGrid: Grid) =
+let private blockCanMoveRight (gameGrid: Grid) =
     if gameGrid.ActiveBlock.IsNone then
         false
     else
@@ -75,15 +61,34 @@ let blockCanMoveRight (gameGrid: Grid) =
 
         not (Seq.exists obstructionToRight gameGrid.ActiveBlock.Value.Rows)
 
-let blockCanMoveLeft (gameGrid: Grid) =
+let private blockCanMoveDown (gameGrid: Grid) =
     if gameGrid.ActiveBlock.IsNone then
         false
     else
         let startingX = gameGrid.ActiveBlock.Value.Location.X
+        let startingY = gameGrid.ActiveBlock.Value.Location.Y
 
-        let obstructionToLeft (row: Row.Row) =
-            let leftMostCell = Seq.tryItem 0 row |> Option.defaultValue false
+        let obstructionBelowRow rowIndex =
+            if gameGrid.Rows.Length <= startingY + rowIndex + 1 then
+                true
+            else
+                let row = Array.tryItem rowIndex gameGrid.ActiveBlock.Value.Rows 
+                let obstructionBelowCell columnIndex =
+                    let blockCell = Option.bind (fun r -> Array.tryItem columnIndex r) row |> Option.defaultValue false
+                    let gameGridCellBelow =
+                        Array.tryItem (startingY + rowIndex + 1) gameGrid.Rows
+                        |> Option.bind (fun r -> Array.tryItem (startingX + columnIndex) r)
+                        |> Option.defaultValue false
 
-            leftMostCell && startingX <= 0
+                    blockCell && gameGridCellBelow
 
-        not (Seq.exists obstructionToLeft gameGrid.ActiveBlock.Value.Rows)
+                Option.map (fun (r: Row.Row) -> Seq.exists obstructionBelowCell (seq { 0 .. r.Length - 1 })) row 
+                    |> Option.defaultValue false
+
+        not (Seq.exists obstructionBelowRow (seq { 0 .. gameGrid.ActiveBlock.Value.Rows.Length - 1 }))
+
+let activeBlockCanMove (gameGrid: Grid) (direction: Direction.Direction) =
+    match direction with
+    | Direction.Left -> blockCanMoveLeft gameGrid
+    | Direction.Right -> blockCanMoveRight gameGrid
+    | Direction.Down -> blockCanMoveDown gameGrid
