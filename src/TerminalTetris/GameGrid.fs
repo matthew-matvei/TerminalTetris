@@ -46,13 +46,20 @@ let private blockCanMoveLeft (gameGrid: Grid) =
         false
     else
         let startingX = gameGrid.ActiveBlock.Value.Location.X
+        let startingY = gameGrid.ActiveBlock.Value.Location.Y
+        let firstActiveBlockRow = Seq.tryHead gameGrid.ActiveBlock.Value.Rows |> Option.defaultValue Array.empty
 
-        let obstructionToLeft (row: Row.Row) =
-            let leftMostCell = Seq.tryItem 0 row |> Option.defaultValue false
+        let obstructionToLeftOfColumn columnIndex =
+            if startingX + columnIndex = 0 then
+                true
+            else
+                let obstructionToLeftOfCell rowIndex =
+                    activeBlockPresent gameGrid.ActiveBlock (startingY + rowIndex) (startingX + columnIndex)
+                        && gameGridBlockPresent gameGrid (startingY + rowIndex) (startingX + columnIndex - 1)
 
-            leftMostCell && startingX <= 0
+                Seq.exists obstructionToLeftOfCell (seq { 0 .. gameGrid.ActiveBlock.Value.Rows.Length - 1 })
 
-        not (Seq.exists obstructionToLeft gameGrid.ActiveBlock.Value.Rows)
+        not (Seq.exists obstructionToLeftOfColumn (seq { 0 .. firstActiveBlockRow.Length - 1 }))
 
 let private blockCanMoveRight (gameGrid: Grid) =
     if gameGrid.ActiveBlock.IsNone then
