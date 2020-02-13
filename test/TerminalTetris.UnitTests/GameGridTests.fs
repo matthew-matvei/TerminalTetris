@@ -112,13 +112,13 @@ let givenFusedBlockUnderneathActiveBlockWhenQueryingIfActiveBlockCanMoveDownThen
     GameGrid.activeBlockCanMove gameGrid Direction.Down |> Assert.False
 
 [<Fact>]
-let ``GIVEN no active block WHEN querying if an active block can move right THEN it returns false`` () =
+let givenNoActiveBlockWhenQueryingIfActiveBlockCanMoveRightThenItReturnsFalse () =
     let gameGrid = { GameGrid.create 2 2 with ActiveBlock = Option<Block.Block>.None }
 
     GameGrid.activeBlockCanMove gameGrid Direction.Right |> Assert.False
 
 [<Fact>]
-let ``GIVEN right side of active block is at right edge of game grid WHEN querying if an active block can move right THEN it returns false`` () =
+let givenRightSideOfActiveBlockAtRightEdgeOfGameGridWhenQueryingIfActiveBlockCanMoveRightThenItReturnsFalse () =
     let blockWidth = 2
     let gridWidth = 10
     let activeBlock = Some(createTestBlockAtLocation (blockWidth, 2) { X = gridWidth - blockWidth; Y = 0 })
@@ -127,7 +127,7 @@ let ``GIVEN right side of active block is at right edge of game grid WHEN queryi
     GameGrid.activeBlockCanMove gameGrid Direction.Right |> Assert.False
 
 [<Fact>]
-let ``GIVEN right side of active block is past right edge of game grid WHEN querying if an active block can move right THEN it returns false`` () =
+let givenRightSideOfActiveBlockPastRightEdgeOfGameGridWhenQueryingIfActiveBlockCanMoveRightThenItReturnsFalse () =
     let blockWidth = 2
     let gridWidth = 10
     let activeBlock = Some(createTestBlockAtLocation (blockWidth, 2) { X = gridWidth - blockWidth + 1; Y = 0 })
@@ -136,7 +136,7 @@ let ``GIVEN right side of active block is past right edge of game grid WHEN quer
     GameGrid.activeBlockCanMove gameGrid Direction.Right |> Assert.False
 
 [<Fact>]
-let ``GIVEN the right side of active block is not obstructed by the edge of game grid WHEN querying if an active block can move right THEN it returns true`` () =
+let givenRightSideOfActiveBlockNotObstructedThenReturnsTrue () =
     let blockWidth = 2
     let gridWidth = 10
     let activeBlock = Some(createTestBlockAtLocation (blockWidth, 2) { X = gridWidth - blockWidth - 1; Y = 0 })
@@ -145,28 +145,52 @@ let ``GIVEN the right side of active block is not obstructed by the edge of game
     GameGrid.activeBlockCanMove gameGrid Direction.Right |> Assert.True
 
 [<Fact>]
-let ``GIVEN no active block WHEN querying if an active block can move left THEN it returns false`` () =
+let givenFusedBlockToRightOfActiveBlockWhenQueryingIfActiveBlockCanMoveRightThenItReturnsFalse () =
+    let activeBlock = Some(createTestBlockAtLocation (2, 2) { X = 0; Y = 0 })
+    let gameGrid =
+        { GameGrid.create 4 4 with ActiveBlock = activeBlock }
+        |> withCellSetAtLocation { X = 2; Y = 0 }
+        |> withCellSetAtLocation { X = 2; Y = 1 }
+        |> withCellSetAtLocation { X = 3; Y = 0 }
+        |> withCellSetAtLocation { X = 3; Y = 1 }
+
+    GameGrid.activeBlockCanMove gameGrid Direction.Right |> Assert.False
+
+[<Fact>]
+let givenNoActiveBlockWhenQueryingIfActiveBlockCanMoveLeftThenItReturnsFalse () =
     let gameGrid = { GameGrid.create 2 2 with ActiveBlock = Option<Block.Block>.None }
 
     GameGrid.activeBlockCanMove gameGrid Direction.Left |> Assert.False
 
 [<Fact>]
-let ``GIVEN left side of active block is at left edge of game grid WHEN querying if an active block can move left THEN it returns false`` () =
+let givenLeftSideOfActiveBlockAtLeftEdgeOfGameGridWhenQueryingIfActiveBlockCanMoveLeftThenItReturnsFalse () =
     let activeBlock = Some(createTestBlockAtLocation (2, 2) { X = 0; Y = 0 })
     let gameGrid = { GameGrid.create 10 10 with ActiveBlock = activeBlock }
 
     GameGrid.activeBlockCanMove gameGrid Direction.Left |> Assert.False
 
 [<Fact>]
-let ``GIVEN left side of active block is past left edge of game grid WHEN querying if an active block can move left THEN it returns false`` () =
+let givenLeftSideOfActiveBlockIsPastLeftEdgeOfGameGridWhenQueryingIfActiveBlockCanMoveLeftThenItReturnsFalse () =
     let activeBlock = Some(createTestBlockAtLocation (2, 2) { X = -1; Y = 0 })
     let gameGrid = { GameGrid.create 10 10 with ActiveBlock = activeBlock }
 
     GameGrid.activeBlockCanMove gameGrid Direction.Left |> Assert.False
 
 [<Fact>]
-let ``GIVEN the left side of active block is not obstructed by the edge of game grid WHEN querying if an active block can move left THEN it returns true`` () =
+let givenLeftSideOfActiveBlockIsNotObstructedWhenQueryingIfActiveBlockCanMoveLeftThenItReturnsTrue () =
     let activeBlock = Some(createTestBlockAtLocation (2, 2) { X = 1; Y = 0 })
     let gameGrid = { GameGrid.create 10 10 with ActiveBlock = activeBlock }
 
     GameGrid.activeBlockCanMove gameGrid Direction.Left |> Assert.True
+
+[<Fact>]
+let givenFusedBlockToLeftOfActiveBlockWhenQueryingIfActiveBlockCanMoveLeftThenItReturnsFalse () =
+    let activeBlock = Some(createTestBlockAtLocation (2, 2) { X = 2; Y = 0 })
+    let gameGrid =
+        { GameGrid.create 4 4 with ActiveBlock = activeBlock }
+        |> withCellSetAtLocation { X = 0; Y = 0 }
+        |> withCellSetAtLocation { X = 0; Y = 1 }
+        |> withCellSetAtLocation { X = 1; Y = 0 }
+        |> withCellSetAtLocation { X = 1; Y = 1 }
+
+    GameGrid.activeBlockCanMove gameGrid Direction.Left |> Assert.False
