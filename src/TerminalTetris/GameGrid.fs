@@ -12,12 +12,20 @@ let private copy gameGrid = { Rows = Array.map Row.copy gameGrid.Rows; ActiveBlo
 let update gameGrid (updateFunction: Grid -> Grid) = copy gameGrid |> updateFunction
 let addBlock gameGrid block = { gameGrid with ActiveBlock = Some(block) }
 
-let activeBlockPresent (activeBlock: Block.Block option) rowIndex columnIndex =
+let private activeBlockPresent (activeBlock: Block.Block option) rowIndex columnIndex =
     if activeBlock.IsNone then
         false
     else
         Array.tryItem (rowIndex - activeBlock.Value.Location.Y) activeBlock.Value.Rows
             |> Option.bind (fun r -> Array.tryItem (columnIndex - activeBlock.Value.Location.X) r)
+            |> Option.defaultValue false
+
+let private gameGridBlockPresent (gameGrid: Grid) rowIndex columnIndex =
+    if activeBlockPresent gameGrid.ActiveBlock rowIndex columnIndex then
+        false
+    else
+        Array.tryItem rowIndex gameGrid.Rows
+            |> Option.bind (Array.tryItem columnIndex)
             |> Option.defaultValue false
 
 let private renderRow (activeBlock: Block.Block option) rowIndex row =
@@ -74,13 +82,8 @@ let private blockCanMoveDown (gameGrid: Grid) =
             else
                 let row = Array.tryItem rowIndex gameGrid.ActiveBlock.Value.Rows 
                 let obstructionBelowCell columnIndex =
-                    let blockCell = Option.bind (fun r -> Array.tryItem columnIndex r) row |> Option.defaultValue false
-                    let gameGridCellBelow =
-                        Array.tryItem (startingY + rowIndex + 1) gameGrid.Rows
-                        |> Option.bind (fun r -> Array.tryItem (startingX + columnIndex) r)
-                        |> Option.defaultValue false
-
-                    blockCell && gameGridCellBelow
+                    activeBlockPresent gameGrid.ActiveBlock (startingY + rowIndex) (startingX + columnIndex)
+                        && gameGridBlockPresent gameGrid (startingY + rowIndex + 1) (startingX + columnIndex)
 
                 Option.map (fun (r: Row.Row) -> Seq.exists obstructionBelowCell (seq { 0 .. r.Length - 1 })) row 
                     |> Option.defaultValue false
