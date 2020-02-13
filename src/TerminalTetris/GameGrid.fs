@@ -85,9 +85,7 @@ let private blockCanMoveDown (gameGrid: Grid) =
                 Option.map (fun (r: Row.Row) -> Seq.exists obstructionBelowCell (seq { 0 .. r.Length - 1 })) row 
                     |> Option.defaultValue false
 
-        let somethingBlocking = Seq.exists obstructionBelowRow (seq { 0 .. gameGrid.ActiveBlock.Value.Rows.Length - 1 })
-
-        not somethingBlocking
+        not (Seq.exists obstructionBelowRow (seq { 0 .. gameGrid.ActiveBlock.Value.Rows.Length - 1 }))
 
 let activeBlockCanMove (gameGrid: Grid) (direction: Direction.Direction) =
     match direction with
