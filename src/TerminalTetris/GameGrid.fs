@@ -65,6 +65,7 @@ let private blockCanMoveDown (gameGrid: Grid) =
     if gameGrid.ActiveBlock.IsNone then
         false
     else
+        let startingX = gameGrid.ActiveBlock.Value.Location.X
         let startingY = gameGrid.ActiveBlock.Value.Location.Y
 
         let obstructionBelowRow rowIndex =
@@ -76,7 +77,7 @@ let private blockCanMoveDown (gameGrid: Grid) =
                     let blockCell = Option.bind (fun r -> Array.tryItem columnIndex r) row |> Option.defaultValue false
                     let gameGridCellBelow =
                         Array.tryItem (startingY + rowIndex + 1) gameGrid.Rows
-                        |> Option.bind (fun r -> Array.tryItem columnIndex r)
+                        |> Option.bind (fun r -> Array.tryItem (startingX + columnIndex) r)
                         |> Option.defaultValue false
 
                     blockCell && gameGridCellBelow
