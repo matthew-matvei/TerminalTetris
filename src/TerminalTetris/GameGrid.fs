@@ -2,15 +2,23 @@ module GameGrid
 
 type Grid =
     { Rows: Row.Row[]
-      ActiveBlock: Option<Block.Block> }
+      ActiveBlock: Option<Block.Block>
+      NextBlock: Block.Block }
 
 let create numRows numColumns =
     { Rows = Array.create numRows (Array.create numColumns false)
-      ActiveBlock = Option<Block.Block>.None }
+      ActiveBlock = Option<Block.Block>.None
+      NextBlock = Block.generateRandom() }
 
-let private copy gameGrid = { Rows = Array.map Row.copy gameGrid.Rows; ActiveBlock = gameGrid.ActiveBlock }
+let private copy gameGrid = { 
+    Rows = Array.map Row.copy gameGrid.Rows
+    ActiveBlock = gameGrid.ActiveBlock
+    NextBlock = gameGrid.NextBlock }
+
 let update gameGrid (updateFunction: Grid -> Grid) = copy gameGrid |> updateFunction
-let addBlock gameGrid block = { gameGrid with ActiveBlock = Some(block) }
+let addBlock gameGrid = { gameGrid with 
+                            ActiveBlock = Some(gameGrid.NextBlock)
+                            NextBlock = Block.generateRandom() }
 
 let private activeBlockPresent (activeBlock: Block.Block option) (gameGridLocation: Location.Location) =
     if activeBlock.IsNone then
