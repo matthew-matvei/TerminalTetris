@@ -3,6 +3,9 @@
 [<EntryPoint>]
 let main _ =
     let exitCode = 0
+    
+    Console.Title <- "Terminal Tetris"
+    Console.Clear()
 
     let (numRows, numColumns) = (10, 5)
     let mutable gameGrid = GameGrid.create numRows numColumns
