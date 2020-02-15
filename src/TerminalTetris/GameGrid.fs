@@ -8,7 +8,7 @@ type Grid =
 let create numRows numColumns =
     { Rows = Array.create numRows (Array.create numColumns false)
       ActiveBlock = Option<Block.Block>.None
-      NextBlock = Block.generateRandom }
+      NextBlock = Block.generateRandom() }
 
 let private copy gameGrid = { 
     Rows = Array.map Row.copy gameGrid.Rows
@@ -18,7 +18,7 @@ let private copy gameGrid = {
 let update gameGrid (updateFunction: Grid -> Grid) = copy gameGrid |> updateFunction
 let addBlock gameGrid = { gameGrid with 
                             ActiveBlock = Some(gameGrid.NextBlock)
-                            NextBlock = Block.generateRandom }
+                            NextBlock = Block.generateRandom() }
 
 let private activeBlockPresent (activeBlock: Block.Block option) (gameGridLocation: Location.Location) =
     if activeBlock.IsNone then

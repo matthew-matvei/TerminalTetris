@@ -6,6 +6,7 @@ open Microsoft.FSharp.Reflection
 type Block = { Rows: Row.Row[]; Location: Location.Location }
 type BlockType =
     | Square
+    | Line
 
 let private numberOfBlockTypes = FSharpType.GetUnionCases(typeof<BlockType>).Length
 
@@ -13,13 +14,20 @@ let private createSquare _ =
     { Rows = [| [| true; true |]; [| true; true; |] |]
       Location = { X = 0; Y = 0 }}
 
+let private createLine _ =
+    { Rows = [| [| true |]; [| true |]; [| true |]; [| true |] |]
+      Location = { X = 0; Y = 0 }}
+
 let create blockType =
     match blockType with
     | Square -> createSquare()
+    | Line -> createLine()
 
-let generateRandom =
-    let random = Random()
-    match random.Next(numberOfBlockTypes) with
+let generateRandom _ =
+    let random = Random().Next(numberOfBlockTypes)
+    match random with
+    | 0 -> create Square
+    | 1 -> create Line
     | _ -> create Square
 
 let move (direction: Direction.Direction) (block: Block) =
