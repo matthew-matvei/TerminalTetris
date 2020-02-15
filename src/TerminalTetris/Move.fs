@@ -26,7 +26,7 @@ let private moveBlockDown gameGrid =
 
 let blockDown (gameGrid: GameGrid.Grid) =
     if gameGrid.ActiveBlock.IsNone then
-        GameGrid.addBlock gameGrid (Block.create Block.Square)
+        GameGrid.addBlock gameGrid
     else
         moveBlockDown gameGrid
 

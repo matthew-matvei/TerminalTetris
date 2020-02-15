@@ -1,8 +1,13 @@
 module Block
 
+open System
+open Microsoft.FSharp.Reflection
+
 type Block = { Rows: Row.Row[]; Location: Location.Location }
 type BlockType =
     | Square
+
+let private numberOfBlockTypes = FSharpType.GetUnionCases(typeof<BlockType>).Length
 
 let private createSquare _ =
     { Rows = [| [| true; true |]; [| true; true; |] |]
@@ -11,6 +16,11 @@ let private createSquare _ =
 let create blockType =
     match blockType with
     | Square -> createSquare()
+
+let generateRandom =
+    let random = Random()
+    match random.Next(numberOfBlockTypes) with
+    | _ -> create Square
 
 let move (direction: Direction.Direction) (block: Block) =
     match direction with
