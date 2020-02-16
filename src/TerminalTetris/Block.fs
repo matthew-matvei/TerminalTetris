@@ -10,25 +10,25 @@ type BlockType =
 
 let private numberOfBlockTypes = FSharpType.GetUnionCases(typeof<BlockType>).Length
 
-let private createSquare _ =
+let private createSquareAt (location: Location.Location) =
     { Rows = [| [| true; true |]; [| true; true; |] |]
-      Location = { X = 0; Y = 0 }}
+      Location = location }
 
-let private createLine _ =
+let private createLineAt (location: Location.Location) =
     { Rows = [| [| true |]; [| true |]; [| true |]; [| true |] |]
-      Location = { X = 0; Y = 0 }}
+      Location = location }
 
-let create blockType =
+let createAt (location: Location.Location) blockType =
     match blockType with
-    | Square -> createSquare()
-    | Line -> createLine()
+    | Square -> createSquareAt location
+    | Line -> createLineAt location
 
-let generateRandom _ =
+let generateRandomAt (location: Location.Location) =
     let random = Random().Next(numberOfBlockTypes)
     match random with
-    | 0 -> create Square
-    | 1 -> create Line
-    | _ -> create Square
+    | 0 -> createAt location Square
+    | 1 -> createAt location Line
+    | _ -> createAt location Square
 
 let private newLocation (oldLocation: Location.Location) rowCount columnCount =
     let middleX = Decimal.Floor(decimal columnCount / 2m) |> int
