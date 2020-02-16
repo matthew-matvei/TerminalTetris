@@ -31,8 +31,8 @@ let generateRandomAt (location: Location.Location) =
     | _ -> createAt location Square
 
 let private newLocation (oldLocation: Location.Location) rowCount columnCount =
-    let middleX = Decimal.Floor(decimal columnCount / 2m) |> int
-    let middleY = Decimal.Floor(decimal rowCount / 2m) |> int
+    let middleX = columnCount / 2
+    let middleY = rowCount / 2
     { Location.X = oldLocation.X + middleY - middleX
       Location.Y = oldLocation.Y + middleX - middleY }
 
