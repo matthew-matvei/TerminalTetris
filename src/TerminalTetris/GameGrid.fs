@@ -129,8 +129,14 @@ let private blockCanRotate (gameGrid: Grid) =
 
             let cellOutsideBoundary columnIndex =
                 let gameGridRow = Array.tryHead gameGrid.Rows |> Option.defaultValue Array.empty
+                let outsideBoundary = 
+                    startingY + rowIndex >= gameGrid.Rows.Length 
+                        || startingY + rowIndex < 0
+                        || startingX + columnIndex >= gameGridRow.Length
+                        || startingX + columnIndex < 0
+
                 activeBlockPresent (Some(rotatedActiveBlock)) { X = startingX + columnIndex; Y = startingY + rowIndex }
-                    && (startingY + rowIndex >= gameGrid.Rows.Length || startingX + columnIndex >= gameGridRow.Length)
+                    && outsideBoundary
 
             Seq.exists (fun columnIndex -> cellHasObstruction columnIndex || cellOutsideBoundary columnIndex) (seq { 0 .. row.Length - 1 })
 
