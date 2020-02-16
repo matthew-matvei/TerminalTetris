@@ -30,6 +30,12 @@ let generateRandom _ =
     | 1 -> create Line
     | _ -> create Square
 
+let private newLocation (oldLocation: Location.Location) rowCount columnCount =
+    let middleX = Decimal.Floor(decimal columnCount / 2m) |> int
+    let middleY = Decimal.Floor(decimal rowCount / 2m) |> int
+    { Location.X = oldLocation.X + middleY - middleX
+      Location.Y = oldLocation.Y + middleX - middleY }
+
 let rotate (block: Block) =
     let columnCount = Array.head block.Rows |> Array.length
 
@@ -40,7 +46,12 @@ let rotate (block: Block) =
         Seq.map (createRowFromColumn >> Array.rev) (seq {0 .. columnCount - 1})
         |> Seq.toArray
 
-    { block with Rows = newRows }
+    let newRowCount = newRows.Length
+    let newColumnCount = Array.head newRows |> Array.length
+
+    { block with 
+        Rows = newRows
+        Location = newLocation block.Location newRowCount newColumnCount }
 
 let move (direction: Direction.Direction) (block: Block) =
     match direction with
