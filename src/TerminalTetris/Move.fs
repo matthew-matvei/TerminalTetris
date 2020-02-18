@@ -8,6 +8,17 @@ let private getCellCoordinates (activeBlock: Block.Block) rowIndex =
 let private setCellAtLocation (gameGrid: GameGrid.Grid) (location: Location.Location) =
     Array.set gameGrid.Rows.[location.Y] location.X true
 
+let private removeFullRows (gameGrid: GameGrid.Grid) =
+    let newRows = ResizeArray<Row.Row>()
+
+    for row in gameGrid.Rows do
+        if Row.isFull row then
+            newRows.Insert(0, Array.zeroCreate row.Length)
+        else
+            newRows.Add(row)
+
+    { gameGrid with Rows = newRows.ToArray() }
+
 let private fuseBlockWithGrid (gameGrid: GameGrid.Grid) =
     if gameGrid.ActiveBlock.IsNone then
         gameGrid
@@ -22,7 +33,7 @@ let private moveBlockDown gameGrid =
     if GameGrid.activeBlockCanMove gameGrid Direction.Down then
         { gameGrid with ActiveBlock = Some(Block.move Direction.Down gameGrid.ActiveBlock.Value) }
     else
-        fuseBlockWithGrid gameGrid
+        fuseBlockWithGrid gameGrid |> removeFullRows
 
 let blockDown (gameGrid: GameGrid.Grid) =
     if gameGrid.ActiveBlock.IsNone then
