@@ -31,17 +31,19 @@ let blockDown (gameGrid: GameGrid.Grid) =
         moveBlockDown gameGrid
 
 let blockRight (gameGrid: GameGrid.Grid) =
-    if gameGrid.ActiveBlock.IsNone then
-        gameGrid
-    else if GameGrid.activeBlockCanMove gameGrid Direction.Right then
+    if GameGrid.activeBlockCanMove gameGrid Direction.Right then
         { gameGrid with ActiveBlock = Some(Block.move Direction.Right gameGrid.ActiveBlock.Value) }
     else
         gameGrid
 
 let blockLeft (gameGrid: GameGrid.Grid) =
-    if gameGrid.ActiveBlock.IsNone then
-        gameGrid
-    else if GameGrid.activeBlockCanMove gameGrid Direction.Left then
+    if GameGrid.activeBlockCanMove gameGrid Direction.Left then
         { gameGrid with ActiveBlock = Some(Block.move Direction.Left gameGrid.ActiveBlock.Value) }
+    else
+        gameGrid
+
+let rotateBlock (gameGrid: GameGrid.Grid) =
+    if GameGrid.activeBlockCanMove gameGrid Direction.Rotate then
+        { gameGrid with ActiveBlock = Some(Block.move Direction.Rotate gameGrid.ActiveBlock.Value) }
     else
         gameGrid

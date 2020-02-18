@@ -8,7 +8,7 @@ type Grid =
 let create numRows numColumns =
     { Rows = Array.create numRows (Array.create numColumns false)
       ActiveBlock = Option<Block.Block>.None
-      NextBlock = Block.generateRandom() }
+      NextBlock = Block.generateRandomAt { X = numColumns / 2; Y = 0 } }
 
 let private copy gameGrid = { 
     Rows = Array.map Row.copy gameGrid.Rows
@@ -16,9 +16,11 @@ let private copy gameGrid = {
     NextBlock = gameGrid.NextBlock }
 
 let update gameGrid (updateFunction: Grid -> Grid) = copy gameGrid |> updateFunction
-let addBlock gameGrid = { gameGrid with 
-                            ActiveBlock = Some(gameGrid.NextBlock)
-                            NextBlock = Block.generateRandom() }
+let addBlock (gameGrid: Grid) = 
+    let columnCount = Array.tryHead gameGrid.Rows |> Option.defaultValue Array.empty |> Array.length
+    { gameGrid with 
+        ActiveBlock = Some(gameGrid.NextBlock)
+        NextBlock = Block.generateRandomAt { X = columnCount / 2; Y = 0 } }
 
 let private activeBlockPresent (activeBlock: Block.Block option) (gameGridLocation: Location.Location) =
     if activeBlock.IsNone then
@@ -110,8 +112,39 @@ let private blockCanMoveDown (gameGrid: Grid) =
 
         not (Seq.exists obstructionBelowRow (seq { 0 .. gameGrid.ActiveBlock.Value.Rows.Length - 1 }))
 
+let private blockCanRotate (gameGrid: Grid) =
+    if gameGrid.ActiveBlock.IsNone then
+        false
+    else
+        let rotatedActiveBlock = Block.rotate gameGrid.ActiveBlock.Value
+        let startingX = rotatedActiveBlock.Location.X
+        let startingY = rotatedActiveBlock.Location.Y
+
+        let rowHasObstruction rowIndex =
+            let row = Array.tryItem rowIndex rotatedActiveBlock.Rows |> Option.defaultValue Array.empty
+
+            let cellHasObstruction columnIndex =
+                activeBlockPresent (Some(rotatedActiveBlock)) { X = startingX + columnIndex; Y = startingY + rowIndex }
+                    && gameGridBlockPresent gameGrid { X = startingX + columnIndex; Y = startingY + rowIndex }
+
+            let cellOutsideBoundary columnIndex =
+                let gameGridRow = Array.tryHead gameGrid.Rows |> Option.defaultValue Array.empty
+                let outsideBoundary = 
+                    startingY + rowIndex >= gameGrid.Rows.Length 
+                        || startingY + rowIndex < 0
+                        || startingX + columnIndex >= gameGridRow.Length
+                        || startingX + columnIndex < 0
+
+                activeBlockPresent (Some(rotatedActiveBlock)) { X = startingX + columnIndex; Y = startingY + rowIndex }
+                    && outsideBoundary
+
+            Seq.exists (fun columnIndex -> cellHasObstruction columnIndex || cellOutsideBoundary columnIndex) (seq { 0 .. row.Length - 1 })
+
+        not (Seq.exists rowHasObstruction (seq { 0 .. rotatedActiveBlock.Rows.Length - 1 }))
+
 let activeBlockCanMove (gameGrid: Grid) (direction: Direction.Direction) =
     match direction with
     | Direction.Left -> blockCanMoveLeft gameGrid
     | Direction.Right -> blockCanMoveRight gameGrid
     | Direction.Down -> blockCanMoveDown gameGrid
+    | Direction.Rotate -> blockCanRotate gameGrid

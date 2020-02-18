@@ -29,3 +29,42 @@ let ``Block.move can move the given block down`` () =
     let block = createTestBlock { X = 0; Y = startingY }
     let movedBlock = Block.move Direction.Down block
     Assert.Equal(expectedY, movedBlock.Location.Y)
+
+[<Fact>]
+let ``Block.rotate returns the given block rotated 90 degrees clockwise`` () =
+    let rows = [| 
+        [| true; false |]
+        [| true; true |]
+        [| true; false |]
+        |]
+    let expectedRows = [|
+        [| true; true; true |]
+        [| false; true; false |]
+         |]
+    let block = { Block.Rows = rows; Block.Location = { X = 0; Y = 0 }}
+    
+    let rotatedBlock = Block.rotate block
+
+    Assert.Equal<Row.Row>(expectedRows, rotatedBlock.Rows)
+
+[<Fact>]
+let ``Block.rotate rotates a block 4 times to return it to its initial orientation`` () =
+    let rows = [|
+        [| true; false |]
+        [| true; true |]
+        [| true; false |]
+        |]
+    let expectedRows = [|
+        [| true; false |]
+        [| true; true |]
+        [| true; false |]
+        |]
+    let block = { Block.Rows = rows; Block.Location = { X = 0; Y = 0 }}
+
+    let rotatedBlock = 
+        Block.rotate block
+        |> Block.rotate
+        |> Block.rotate
+        |> Block.rotate
+
+    Assert.Equal<Row.Row>(expectedRows, rotatedBlock.Rows)

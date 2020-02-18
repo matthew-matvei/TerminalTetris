@@ -194,3 +194,19 @@ let givenFusedBlockToLeftOfActiveBlockWhenQueryingIfActiveBlockCanMoveLeftThenIt
         |> withCellSetAtLocation { X = 1; Y = 1 }
 
     GameGrid.activeBlockCanMove gameGrid Direction.Left |> Assert.False
+
+[<Fact>]
+let WhenAddingBlockThenNextBlockPlacedInHorizontalCentreOfGameGrid () =
+    let columnCount = 10
+    let expectedMidPoint = 5
+    
+    let gameGrid = GameGrid.create 10 columnCount |> GameGrid.addBlock
+
+    Assert.Equal(expectedMidPoint, gameGrid.NextBlock.Location.X)
+
+[<Fact>]
+let WhenAddingBlockThenNextBlockSetToActiveBlock () =
+    let nextBlock = { Block.Rows = [||]; Block.Location = { X = 0; Y = 0 }}
+    let gameGrid = { GameGrid.create 4 4 with NextBlock = nextBlock }
+
+    Assert.Same(nextBlock, (GameGrid.addBlock gameGrid).ActiveBlock.Value)
