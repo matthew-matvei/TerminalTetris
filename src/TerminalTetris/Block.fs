@@ -7,6 +7,9 @@ type Block = { Rows: Row.Row[]; Location: Location.Location }
 type BlockType =
     | Square
     | Line
+    | L
+    | Triangle
+    | ZigZag
 
 let private numberOfBlockTypes = FSharpType.GetUnionCases(typeof<BlockType>).Length
 
@@ -18,16 +21,47 @@ let private createLineAt (location: Location.Location) =
     { Rows = [| [| true |]; [| true |]; [| true |]; [| true |] |]
       Location = location }
 
+let private createLAt (location: Location.Location) =
+    { Rows = [|
+        [| false; true |]
+        [| false; true |]
+        [| false; true |]
+        [| true; true |]
+        |]
+      Location = location }
+
+let private createTriangleAt (location: Location.Location) =
+    { Rows = [|
+        [| true; false |]
+        [| true; true |]
+        [| true; false |]
+        |]
+      Location = location }
+
+let private createZigZagAt (location: Location.Location) =
+    { Rows = [|
+        [| true; false |]
+        [| true; true |]
+        [| false; true |]
+        |]
+      Location = location }
+
 let createAt (location: Location.Location) blockType =
     match blockType with
     | Square -> createSquareAt location
     | Line -> createLineAt location
+    | L -> createLAt location
+    | Triangle -> createTriangleAt location
+    | ZigZag -> createZigZagAt location
 
 let generateRandomAt (location: Location.Location) =
     let random = Random().Next(numberOfBlockTypes)
     match random with
     | 0 -> createAt location Square
     | 1 -> createAt location Line
+    | 2 -> createAt location L
+    | 3 -> createAt location Triangle
+    | 4 -> createAt location ZigZag
     | _ -> createAt location Square
 
 let private newLocation (oldLocation: Location.Location) rowCount columnCount =
