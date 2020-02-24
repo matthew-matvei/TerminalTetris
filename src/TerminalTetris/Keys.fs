@@ -8,4 +8,5 @@ let applyKeyEvent (key: ConsoleKeyInfo) (gameGrid: GameGrid.Grid) =
     | ConsoleKey.LeftArrow -> Move.blockLeft gameGrid
     | ConsoleKey.DownArrow -> Move.blockDown gameGrid
     | ConsoleKey.Spacebar -> Move.rotateBlock gameGrid
+    | ConsoleKey.UpArrow -> Move.rotateBlock gameGrid
     | _ -> gameGrid

@@ -6,9 +6,12 @@ type Grid =
       NextBlock: Block.Block }
 
 let create numRows numColumns =
+    let nextBlock = Block.generateRandom()
+    let yOffset = nextBlock.Rows.Length
+    
     { Rows = Array.create numRows (Array.create numColumns false)
       ActiveBlock = Option<Block.Block>.None
-      NextBlock = Block.generateRandomAt { X = numColumns / 2; Y = 0 } }
+      NextBlock = { nextBlock with Location = { X = numColumns / 2; Y = -yOffset } } }
 
 let private copy gameGrid = { 
     Rows = Array.map Row.copy gameGrid.Rows
@@ -18,9 +21,12 @@ let private copy gameGrid = {
 let update gameGrid (updateFunction: Grid -> Grid) = copy gameGrid |> updateFunction
 let addBlock (gameGrid: Grid) = 
     let columnCount = Array.tryHead gameGrid.Rows |> Option.defaultValue Array.empty |> Array.length
+    let nextBlock = Block.generateRandom()
+    let yOffset = nextBlock.Rows.Length
+
     { gameGrid with 
         ActiveBlock = Some(gameGrid.NextBlock)
-        NextBlock = Block.generateRandomAt { X = columnCount / 2; Y = 0 } }
+        NextBlock = { nextBlock with Location = { X = columnCount / 2; Y = -yOffset } } }
 
 let private activeBlockPresent (activeBlock: Block.Block option) (gameGridLocation: Location.Location) =
     if activeBlock.IsNone then
@@ -38,18 +44,29 @@ let private gameGridBlockPresent (gameGrid: Grid) (gameGridLocation: Location.Lo
             |> Option.bind (Array.tryItem gameGridLocation.X)
             |> Option.defaultValue false
 
-let private renderRow (activeBlock: Block.Block option) rowIndex row =
+let private renderCell rowIndex columnIndex (grid: Grid) =
+    if gameGridBlockPresent grid { Y = rowIndex; X = columnIndex } || 
+        activeBlockPresent grid.ActiveBlock { Y = rowIndex; X = columnIndex } then
+        "X"
+    else
+        " "
+
+let private renderRow rowIndex grid =
+    let bar () = if rowIndex >= 0 then [| "|" |] else [| " " |]
+    
+    let rowlength = Array.tryHead grid.Rows |> Option.map Array.length |> Option.defaultValue 0
     Array.concat [
-        [| "|" |]
-        Array.mapi (fun columnIndex column -> if column || activeBlockPresent activeBlock { Y = rowIndex; X = columnIndex } then "X" else " ") row
-        [| "|" |]
+        bar()
+        Array.map 
+            (fun columnIndex -> renderCell rowIndex columnIndex grid) 
+            (Array.ofSeq (seq { 0 .. rowlength - 1 }))
+        bar()
     ]
 
-let render grid =
-    Array.concat [
-        Array.mapi (fun index r -> renderRow grid.ActiveBlock index r) grid.Rows
+let render (grid: Grid) =
+    Array.append
+        (Array.map (fun rowIndex -> renderRow rowIndex grid) (Array.ofSeq (seq { -4 .. grid.Rows.Length - 1 })))
         [| Array.create (grid.Rows.[0].Length + 2) "=" |]
-    ]
 
 let private blockCanMoveLeft (gameGrid: Grid) =
     if gameGrid.ActiveBlock.IsNone then

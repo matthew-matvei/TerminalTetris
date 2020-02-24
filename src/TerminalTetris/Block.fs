@@ -64,6 +64,9 @@ let generateRandomAt (location: Location.Location) =
     | 4 -> createAt location ZigZag
     | _ -> createAt location Square
 
+let generateRandom () =
+    generateRandomAt { X = 0; Y = 0 }
+
 let private newLocation (oldLocation: Location.Location) rowCount columnCount =
     let middleX = columnCount / 2
     let middleY = rowCount / 2
