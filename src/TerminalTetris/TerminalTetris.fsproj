@@ -4,6 +4,7 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ArrayHelpers.fs" />
     <Compile Include="Location.fs" />
     <Compile Include="Row.fs" />
     <Compile Include="Direction.fs" />
