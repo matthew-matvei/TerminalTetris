@@ -28,23 +28,29 @@ let ``GameGrid.create creates a grid with the correct number of columns`` () =
 
 [<Fact>]
 let ``GameGrid.render renders ' ' if a column value is 'false'`` () =
-    let grid = GameGrid.create 1 1
-    grid.Rows.[0].[0] <- false
-    let renderedGrid = GameGrid.render grid
-    Assert.True(Array.contains " " renderedGrid.[0])
+    let renderedGrid = 
+        { GameGrid.create 1 1 with Rows = [| [| false |] |] }
+            |> GameGrid.render
+
+    Array.head renderedGrid |> Array.contains " " |> Assert.True
 
 [<Fact>]
 let ``GameGrid.render renders an 'X' if a column value is 'true'`` () =
-    let grid = GameGrid.create 1 1
-    grid.Rows.[0].[0] <- true
-    let renderedGrid = GameGrid.render grid
-    Assert.True(Array.contains "X" renderedGrid.[0])
+    let gameGridCeilingOffset = 4
+    let renderedGrid =
+        { GameGrid.create 1 1 with Rows = [| [| true |] |] }
+            |> GameGrid.render
+
+    Array.skip gameGridCeilingOffset renderedGrid
+        |> Array.head
+        |> Array.contains "X"
+        |> Assert.True
 
 [<Fact>]
 let ``GameGrid.render renders a final row of '='`` () =
     let renderedGrid = GameGrid.render (GameGrid.create 1 1)
-    let lastRow = Array.last renderedGrid
-    Assert.True(Array.contains "=" lastRow)
+    
+    Array.last renderedGrid |> Array.contains "=" |> Assert.True
 
 [<Fact>]
 let givenGridActiveBlockNotExistWhenQueryIfActiveBlockCanMoveDownThenReturnsFalse () =
@@ -80,10 +86,10 @@ let givenFusedBlockLowerRightThanActiveBlockWhenQueryingIfActiveBlockCanMoveDown
     let activeBlock = Some(createTestBlockAtLocation (2, 2) { X = 0; Y = 0 })
     let gameGrid = 
         { GameGrid.create 4 4 with ActiveBlock = activeBlock }
-        |> withCellSetAtLocation { X = 3; Y = 2 }
-        |> withCellSetAtLocation { X = 3; Y = 3 }
-        |> withCellSetAtLocation { X = 4; Y = 2 }
-        |> withCellSetAtLocation { X = 4; Y = 3 }
+            |> withCellSetAtLocation { X = 3; Y = 2 }
+            |> withCellSetAtLocation { X = 3; Y = 3 }
+            |> withCellSetAtLocation { X = 4; Y = 2 }
+            |> withCellSetAtLocation { X = 4; Y = 3 }
 
     GameGrid.activeBlockCanMove gameGrid Direction.Down |> Assert.True
 
@@ -92,10 +98,10 @@ let givenFusedBlockLowerLeftThanActiveBlockWhenQueryingIfActiveBlockCanMoveDownT
     let activeBlock = Some(createTestBlockAtLocation (2, 2) { X = 2; Y = 0 })
     let gameGrid = 
         { GameGrid.create 4 4 with ActiveBlock = activeBlock }
-        |> withCellSetAtLocation { X = 0; Y = 2 }
-        |> withCellSetAtLocation { X = 0; Y = 3 }
-        |> withCellSetAtLocation { X = 1; Y = 2 }
-        |> withCellSetAtLocation { X = 1; Y = 3 }
+            |> withCellSetAtLocation { X = 0; Y = 2 }
+            |> withCellSetAtLocation { X = 0; Y = 3 }
+            |> withCellSetAtLocation { X = 1; Y = 2 }
+            |> withCellSetAtLocation { X = 1; Y = 3 }
 
     GameGrid.activeBlockCanMove gameGrid Direction.Down |> Assert.True
 
@@ -104,10 +110,10 @@ let givenFusedBlockUnderneathActiveBlockWhenQueryingIfActiveBlockCanMoveDownThen
     let activeBlock = Some(createTestBlockAtLocation (2, 2) { X = 2; Y = 0 })
     let gameGrid =
         { GameGrid.create 4 4 with ActiveBlock = activeBlock }
-        |> withCellSetAtLocation { X = 2; Y = 2 }
-        |> withCellSetAtLocation { X = 2; Y = 3 }
-        |> withCellSetAtLocation { X = 3; Y = 2 }
-        |> withCellSetAtLocation { X = 3; Y = 3 }
+            |> withCellSetAtLocation { X = 2; Y = 2 }
+            |> withCellSetAtLocation { X = 2; Y = 3 }
+            |> withCellSetAtLocation { X = 3; Y = 2 }
+            |> withCellSetAtLocation { X = 3; Y = 3 }
 
     GameGrid.activeBlockCanMove gameGrid Direction.Down |> Assert.False
 
@@ -149,10 +155,10 @@ let givenFusedBlockToRightOfActiveBlockWhenQueryingIfActiveBlockCanMoveRightThen
     let activeBlock = Some(createTestBlockAtLocation (2, 2) { X = 0; Y = 0 })
     let gameGrid =
         { GameGrid.create 4 4 with ActiveBlock = activeBlock }
-        |> withCellSetAtLocation { X = 2; Y = 0 }
-        |> withCellSetAtLocation { X = 2; Y = 1 }
-        |> withCellSetAtLocation { X = 3; Y = 0 }
-        |> withCellSetAtLocation { X = 3; Y = 1 }
+            |> withCellSetAtLocation { X = 2; Y = 0 }
+            |> withCellSetAtLocation { X = 2; Y = 1 }
+            |> withCellSetAtLocation { X = 3; Y = 0 }
+            |> withCellSetAtLocation { X = 3; Y = 1 }
 
     GameGrid.activeBlockCanMove gameGrid Direction.Right |> Assert.False
 
@@ -188,10 +194,10 @@ let givenFusedBlockToLeftOfActiveBlockWhenQueryingIfActiveBlockCanMoveLeftThenIt
     let activeBlock = Some(createTestBlockAtLocation (2, 2) { X = 2; Y = 0 })
     let gameGrid =
         { GameGrid.create 4 4 with ActiveBlock = activeBlock }
-        |> withCellSetAtLocation { X = 0; Y = 0 }
-        |> withCellSetAtLocation { X = 0; Y = 1 }
-        |> withCellSetAtLocation { X = 1; Y = 0 }
-        |> withCellSetAtLocation { X = 1; Y = 1 }
+            |> withCellSetAtLocation { X = 0; Y = 0 }
+            |> withCellSetAtLocation { X = 0; Y = 1 }
+            |> withCellSetAtLocation { X = 1; Y = 0 }
+            |> withCellSetAtLocation { X = 1; Y = 1 }
 
     GameGrid.activeBlockCanMove gameGrid Direction.Left |> Assert.False
 

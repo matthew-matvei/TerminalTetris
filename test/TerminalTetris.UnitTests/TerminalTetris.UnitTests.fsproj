@@ -8,6 +8,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArrayHelpersTests.fs" />
     <Compile Include="GameGridTests.fs" />
     <Compile Include="BlockTests.fs" />
     <Compile Include="Program.fs" />

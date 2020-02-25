@@ -6,7 +6,9 @@ let private getCellCoordinates (activeBlock: Block.Block) rowIndex =
         |> Seq.map (fun columnIndex -> { Location.Y = rowIndex + activeBlock.Location.Y; Location.X = columnIndex + activeBlock.Location.X })
 
 let private setCellAtLocation (gameGrid: GameGrid.Grid) (location: Location.Location) =
-    Array.set gameGrid.Rows.[location.Y] location.X true
+    let row = Array.tryItem location.Y gameGrid.Rows |> Option.defaultValue Array.empty
+    
+    ArrayHelpers.trySet row location.X true
 
 let private removeFullRows (gameGrid: GameGrid.Grid) =
     let newRows = ResizeArray<Row.Row>()

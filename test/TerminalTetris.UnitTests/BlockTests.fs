@@ -68,3 +68,10 @@ let ``Block.rotate rotates a block 4 times to return it to its initial orientati
         |> Block.rotate
 
     Assert.Equal<Row.Row>(expectedRows, rotatedBlock.Rows)
+
+[<Fact>]
+let ``Block.generateRandom generates some random block at location X = 0 and Y = 0`` () =
+    let randomBlock = Block.generateRandom()
+    let expectedLocation = { Location.X = 0; Location.Y = 0 }
+
+    Assert.Equal<Location.Location>(expectedLocation, randomBlock.Location)
