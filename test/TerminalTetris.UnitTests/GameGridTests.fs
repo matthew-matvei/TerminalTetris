@@ -35,10 +35,15 @@ let ``GameGrid.render renders ' ' if a column value is 'false'`` () =
 
 [<Fact>]
 let ``GameGrid.render renders an 'X' if a column value is 'true'`` () =
-    let grid = GameGrid.create 1 1
-    grid.Rows.[0].[0] <- true
-    let renderedGrid = GameGrid.render grid
-    Assert.True(Array.contains "X" renderedGrid.[0])
+    let gameGridCeilingOffset = 4
+    let renderedGrid =
+        { GameGrid.create 1 1 with Rows = [| [| true |] |] }
+            |> GameGrid.render
+
+    Array.skip gameGridCeilingOffset renderedGrid
+        |> Array.head
+        |> Array.contains "X"
+        |> Assert.True
 
 [<Fact>]
 let ``GameGrid.render renders a final row of '='`` () =
