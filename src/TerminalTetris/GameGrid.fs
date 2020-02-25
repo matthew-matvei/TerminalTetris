@@ -148,7 +148,6 @@ let private blockCanRotate (gameGrid: Grid) =
                 let gameGridRow = Array.tryHead gameGrid.Rows |> Option.defaultValue Array.empty
                 let outsideBoundary = 
                     startingY + rowIndex >= gameGrid.Rows.Length 
-                        || startingY + rowIndex < 0
                         || startingX + columnIndex >= gameGridRow.Length
                         || startingX + columnIndex < 0
 
