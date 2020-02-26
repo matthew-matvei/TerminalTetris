@@ -25,7 +25,6 @@ let private createLAt (location: Location.Location) =
     { Rows = [|
         [| false; true |]
         [| false; true |]
-        [| false; true |]
         [| true; true |]
         |]
       Location = location }
