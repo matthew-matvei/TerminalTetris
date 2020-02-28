@@ -5,7 +5,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ArrayHelpers.fs" />
-    <Compile Include="Array2DHelpers.fs" />
     <Compile Include="Location.fs" />
     <Compile Include="Row.fs" />
     <Compile Include="Direction.fs" />

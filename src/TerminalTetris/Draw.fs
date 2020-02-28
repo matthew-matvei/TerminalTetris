@@ -19,9 +19,10 @@ let matrixAtLocation (location: Location.Location) (matrix: string[][]) =
         for columnIndex in seq { 0 .. rowLength - 1 } do
             let previousValue = 
                 previousMatrix
-                |> Option.bind (Array2DHelpers.tryItem rowIndex columnIndex)
+                |> Option.bind (Array.tryItem rowIndex)
+                |> Option.bind (Array.tryItem columnIndex)
 
-            let currentValue = Array2DHelpers.item rowIndex columnIndex matrix
+            let currentValue = Array.item rowIndex matrix |> Array.item columnIndex
 
             if previousValue.IsNone || previousValue.Value <> currentValue then
                 printAt { X = location.X + columnIndex; Y = location.Y + rowIndex } currentValue
