@@ -95,3 +95,9 @@ let move (direction: Direction.Direction) (block: Block) =
     | Direction.Right -> { block with Location = { Y = block.Location.Y; X = block.Location.X + 1}}
     | Direction.Down -> { block with Location = { X = block.Location.X; Y = block.Location.Y + 1 }}
     | Direction.Rotate -> rotate block
+
+let render (block: Block) =
+    let renderRow (row: Row.Row) =
+        Array.map (fun column -> if column then "X" else " ") row
+
+    Array.map renderRow block.Rows

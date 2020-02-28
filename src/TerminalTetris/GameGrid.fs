@@ -64,9 +64,20 @@ let private renderRow rowIndex grid =
     ]
 
 let render (grid: Grid) =
-    Array.append
-        (Array.map (fun rowIndex -> renderRow rowIndex grid) (Array.ofSeq (seq { -4 .. grid.Rows.Length - 1 })))
-        [| Array.create (grid.Rows.[0].Length + 2) "=" |]
+    let ceilingHeight = 4
+    let renderedNextBlock = Block.render grid.NextBlock
+
+    let renderedMainGrid = Array.append
+                            (Array.map 
+                                (fun rowIndex -> renderRow rowIndex grid) 
+                                (Array.ofSeq (seq { -ceilingHeight .. grid.Rows.Length - 1 })))
+                            [| Array.create (grid.Rows.[0].Length + 2) "=" |]
+
+    Array.mapi
+        (fun rowIndex row -> Array.tryItem (rowIndex - ceilingHeight) renderedNextBlock 
+                            |> Option.defaultValue (Array.create renderedNextBlock.[0].Length " ")
+                            |> Array.append row)
+        renderedMainGrid
 
 let private blockCanMoveLeft (gameGrid: Grid) =
     if gameGrid.ActiveBlock.IsNone then
