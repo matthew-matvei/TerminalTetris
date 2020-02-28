@@ -7,17 +7,11 @@ let mutable private previousMatrix = Option<string[][]>.None
 
 let private drawQueue = new ConcurrentQueue<(Location.Location * string[][])>()
 
-let private moveCursorRight () =
-    let newLocation = { Location.X = Console.CursorLeft + 1; Location.Y = Console.CursorTop }
-    Console.SetCursorPosition(newLocation.X, newLocation.Y)
-
-let private moveCursorToNextLine () =
-    let newLocation = { Location.X = 0; Location.Y = Console.CursorTop + 1 }
-    Console.SetCursorPosition(newLocation.X, newLocation.Y)
+let printAt (location: Location.Location) (value: string) =
+    Console.SetCursorPosition(location.X, location.Y)
+    printf "%s" value
 
 let private doWork (location: Location.Location) (matrix: string[][]) =
-    Console.SetCursorPosition(location.X, location.Y)
-
     let rowLength = 
         Array.tryHead matrix 
         |> Option.map Array.length 
@@ -32,12 +26,8 @@ let private doWork (location: Location.Location) (matrix: string[][]) =
             let currentValue = Array2DHelpers.item rowIndex columnIndex matrix
 
             if previousValue.IsNone || previousValue.Value <> currentValue then
-                printf "%s" currentValue
-            else
-                moveCursorRight()
-
-        moveCursorToNextLine()
-
+                printAt { X = location.X + columnIndex; Y = location.Y + rowIndex } currentValue
+            
     previousMatrix <- Some(matrix)
 
 let matrixAtLocation (location: Location.Location) (matrix: string[][]) =
