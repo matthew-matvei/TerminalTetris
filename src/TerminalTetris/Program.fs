@@ -6,6 +6,7 @@ let main _ =
     
     Console.Title <- "Terminal Tetris"
     Console.Clear()
+    Console.CursorVisible <- false
 
     let (numRows, numColumns) = (10, 5)
     let mutable gameGrid = GameGrid.create numRows numColumns
