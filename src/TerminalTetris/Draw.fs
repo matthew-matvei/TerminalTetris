@@ -5,13 +5,11 @@ open System.Collections.Concurrent
 
 let mutable private previousMatrix = Option<string[][]>.None
 
-let private drawQueue = new ConcurrentQueue<(Location.Location * string[][])>()
-
-let printAt (location: Location.Location) (value: string) =
+let private printAt (location: Location.Location) (value: string) =
     Console.SetCursorPosition(location.X, location.Y)
     printf "%s" value
 
-let private doWork (location: Location.Location) (matrix: string[][]) =
+let matrixAtLocation (location: Location.Location) (matrix: string[][]) =
     let rowLength = 
         Array.tryHead matrix 
         |> Option.map Array.length 
@@ -29,11 +27,3 @@ let private doWork (location: Location.Location) (matrix: string[][]) =
                 printAt { X = location.X + columnIndex; Y = location.Y + rowIndex } currentValue
             
     previousMatrix <- Some(matrix)
-
-let matrixAtLocation (location: Location.Location) (matrix: string[][]) =
-    drawQueue.Enqueue((location, matrix))
-
-    while not (drawQueue.IsEmpty) do
-        let success, (l, m) = drawQueue.TryDequeue()
-        if success then
-            doWork l m
