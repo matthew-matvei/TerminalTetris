@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ArrayHelpers.fs" />
+    <Compile Include="Dimensions.fs" />
     <Compile Include="Location.fs" />
     <Compile Include="Row.fs" />
     <Compile Include="Direction.fs" />
@@ -13,6 +14,7 @@
     <Compile Include="Move.fs" />
     <Compile Include="Keys.fs" />
     <Compile Include="Draw.fs" />
+    <Compile Include="Scene.fs" />
     <Compile Include="GameEngine.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

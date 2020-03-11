@@ -77,15 +77,15 @@ let rotate (block: Block) =
 
     let createRowFromColumn columnIndex =
         Array.map (fun r -> Array.item columnIndex r) block.Rows
-    
-    let newRows = 
+
+    let newRows =
         Seq.map (createRowFromColumn >> Array.rev) (seq {0 .. columnCount - 1})
         |> Seq.toArray
 
     let newRowCount = newRows.Length
     let newColumnCount = Array.head newRows |> Array.length
 
-    { block with 
+    { block with
         Rows = newRows
         Location = newLocation block.Location newRowCount newColumnCount }
 
@@ -97,7 +97,18 @@ let move (direction: Direction.Direction) (block: Block) =
     | Direction.Rotate -> rotate block
 
 let render (block: Block) =
-    let renderRow (row: Row.Row) =
-        Array.map (fun column -> if column then "X" else " ") row
+    let largestHeight = 4
+    let largestWidth = 4
 
-    Array.map renderRow block.Rows
+    let renderRow rowIndex =
+        let renderCell columnIndex =
+            let cell =
+                Array.tryItem rowIndex block.Rows
+                |> Option.bind (Array.tryItem columnIndex)
+                |> Option.defaultValue false
+
+            if cell then "X" else " "
+
+        Seq.map renderCell (seq { 0 .. largestWidth - 1 }) |> Seq.toArray
+
+    Seq.map renderRow (seq { 0 .. largestHeight - 1 }) |> Seq.toArray
