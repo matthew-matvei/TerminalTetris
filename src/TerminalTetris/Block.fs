@@ -25,7 +25,6 @@ let private createLAt (location: Location.Location) =
     { Rows = [|
         [| false; true |]
         [| false; true |]
-        [| false; true |]
         [| true; true |]
         |]
       Location = location }
@@ -78,15 +77,15 @@ let rotate (block: Block) =
 
     let createRowFromColumn columnIndex =
         Array.map (fun r -> Array.item columnIndex r) block.Rows
-    
-    let newRows = 
+
+    let newRows =
         Seq.map (createRowFromColumn >> Array.rev) (seq {0 .. columnCount - 1})
         |> Seq.toArray
 
     let newRowCount = newRows.Length
     let newColumnCount = Array.head newRows |> Array.length
 
-    { block with 
+    { block with
         Rows = newRows
         Location = newLocation block.Location newRowCount newColumnCount }
 
@@ -96,3 +95,20 @@ let move (direction: Direction.Direction) (block: Block) =
     | Direction.Right -> { block with Location = { Y = block.Location.Y; X = block.Location.X + 1}}
     | Direction.Down -> { block with Location = { X = block.Location.X; Y = block.Location.Y + 1 }}
     | Direction.Rotate -> rotate block
+
+let render (block: Block) =
+    let largestHeight = 4
+    let largestWidth = 4
+
+    let renderRow rowIndex =
+        let renderCell columnIndex =
+            let cell =
+                Array.tryItem rowIndex block.Rows
+                |> Option.bind (Array.tryItem columnIndex)
+                |> Option.defaultValue false
+
+            if cell then "X" else " "
+
+        Seq.map renderCell (seq { 0 .. largestWidth - 1 }) |> Seq.toArray
+
+    Seq.map renderRow (seq { 0 .. largestHeight - 1 }) |> Seq.toArray

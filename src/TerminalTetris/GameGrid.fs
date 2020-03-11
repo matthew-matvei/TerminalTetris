@@ -5,26 +5,28 @@ type Grid =
       ActiveBlock: Option<Block.Block>
       NextBlock: Block.Block }
 
-let create numRows numColumns =
+let create (dimensions: Dimensions.Dimensions) =
     let nextBlock = Block.generateRandom()
     let yOffset = nextBlock.Rows.Length
-    
+    let numRows = int dimensions.Height
+    let numColumns = int dimensions.Width
+
     { Rows = Array.create numRows (Array.create numColumns false)
       ActiveBlock = Option<Block.Block>.None
       NextBlock = { nextBlock with Location = { X = numColumns / 2; Y = -yOffset } } }
 
-let private copy gameGrid = { 
+let private copy gameGrid = {
     Rows = Array.map Row.copy gameGrid.Rows
     ActiveBlock = gameGrid.ActiveBlock
     NextBlock = gameGrid.NextBlock }
 
 let update gameGrid (updateFunction: Grid -> Grid) = copy gameGrid |> updateFunction
-let addBlock (gameGrid: Grid) = 
+let addBlock (gameGrid: Grid) =
     let columnCount = Array.tryHead gameGrid.Rows |> Option.defaultValue Array.empty |> Array.length
     let nextBlock = Block.generateRandom()
     let yOffset = nextBlock.Rows.Length
 
-    { gameGrid with 
+    { gameGrid with
         ActiveBlock = Some(gameGrid.NextBlock)
         NextBlock = { nextBlock with Location = { X = columnCount / 2; Y = -yOffset } } }
 
@@ -45,7 +47,7 @@ let private gameGridBlockPresent (gameGrid: Grid) (gameGridLocation: Location.Lo
             |> Option.defaultValue false
 
 let private renderCell rowIndex columnIndex (grid: Grid) =
-    if gameGridBlockPresent grid { Y = rowIndex; X = columnIndex } || 
+    if gameGridBlockPresent grid { Y = rowIndex; X = columnIndex } ||
         activeBlockPresent grid.ActiveBlock { Y = rowIndex; X = columnIndex } then
         "X"
     else
@@ -53,19 +55,23 @@ let private renderCell rowIndex columnIndex (grid: Grid) =
 
 let private renderRow rowIndex grid =
     let bar () = if rowIndex >= 0 then [| "|" |] else [| " " |]
-    
+
     let rowlength = Array.tryHead grid.Rows |> Option.map Array.length |> Option.defaultValue 0
     Array.concat [
         bar()
-        Array.map 
-            (fun columnIndex -> renderCell rowIndex columnIndex grid) 
+        Array.map
+            (fun columnIndex -> renderCell rowIndex columnIndex grid)
             (Array.ofSeq (seq { 0 .. rowlength - 1 }))
         bar()
     ]
 
 let render (grid: Grid) =
+    let ceilingHeight = 4
+
     Array.append
-        (Array.map (fun rowIndex -> renderRow rowIndex grid) (Array.ofSeq (seq { -4 .. grid.Rows.Length - 1 })))
+        (Array.map
+            (fun rowIndex -> renderRow rowIndex grid)
+            (Array.ofSeq (seq { -ceilingHeight .. grid.Rows.Length - 1 })))
         [| Array.create (grid.Rows.[0].Length + 2) "=" |]
 
 let private blockCanMoveLeft (gameGrid: Grid) =
@@ -146,8 +152,8 @@ let private blockCanRotate (gameGrid: Grid) =
 
             let cellOutsideBoundary columnIndex =
                 let gameGridRow = Array.tryHead gameGrid.Rows |> Option.defaultValue Array.empty
-                let outsideBoundary = 
-                    startingY + rowIndex >= gameGrid.Rows.Length 
+                let outsideBoundary =
+                    startingY + rowIndex >= gameGrid.Rows.Length
                         || startingX + columnIndex >= gameGridRow.Length
                         || startingX + columnIndex < 0
 
