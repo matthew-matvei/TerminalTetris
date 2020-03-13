@@ -11,11 +11,11 @@
     <Compile Include="Direction.fs" />
     <Compile Include="Block.fs" />
     <Compile Include="GameGrid.fs" />
+    <Compile Include="GameEngine.fs" />
     <Compile Include="Move.fs" />
     <Compile Include="Keys.fs" />
     <Compile Include="Draw.fs" />
     <Compile Include="Scene.fs" />
-    <Compile Include="GameEngine.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 </Project>

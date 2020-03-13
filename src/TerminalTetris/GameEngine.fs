@@ -14,7 +14,7 @@ let incrementGameSpeed (_: unit) =
     if timer.IsNone then
         ignore()
 
-    let decrement = 10.0 * timer.Value.Interval
+    let decrement = 0.1 * timer.Value.Interval
     let currentInterval = timer.Value.Interval
     timer.Value.Interval <- currentInterval - decrement
 
