@@ -10,6 +10,7 @@
     <Compile Include="Row.fs" />
     <Compile Include="Direction.fs" />
     <Compile Include="Block.fs" />
+    <Compile Include="GameEvent.fs" />
     <Compile Include="GameGrid.fs" />
     <Compile Include="GameEngine.fs" />
     <Compile Include="Move.fs" />

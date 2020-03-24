@@ -40,7 +40,7 @@ let private moveBlockDown gameGrid =
         let (grid, removedRowCount) = fuseBlockWithGrid gameGrid |> removeFullRows
 
         if removedRowCount > 0 then
-            grid.GameEvent.Trigger (GameGrid.GameEventArgs.RowsCleared(removedRowCount))
+            grid.GameEvent.Trigger (GameEvent.Args.RowsCleared(removedRowCount))
 
         grid
 

@@ -12,7 +12,7 @@ let main _ =
 
     GameGrid.addGameEventHandler (fun gameEventArgs ->
         match gameEventArgs with
-        | GameGrid.GameEventArgs.RowsCleared _ -> GameEngine.incrementGameSpeed ())
+        | GameEvent.Args.RowsCleared _ -> GameEngine.incrementGameSpeed ())
 
     let updateGrid (gameGridUpdater) =
         gameGrid <- GameGrid.update gameGrid gameGridUpdater
