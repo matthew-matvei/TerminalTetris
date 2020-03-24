@@ -10,6 +10,10 @@ let main _ =
 
     let mutable gameGrid = Scene.getGameGridDimensions() |> GameGrid.create
 
+    GameGrid.addGameEventHandler (fun gameEventArgs ->
+        match gameEventArgs with
+        | GameGrid.GameEventArgs.RowsCleared _ -> GameEngine.incrementGameSpeed ())
+
     let updateGrid (gameGridUpdater) =
         gameGrid <- GameGrid.update gameGrid gameGridUpdater
         GameGrid.render gameGrid |> Scene.drawGameGrid
