@@ -4,6 +4,7 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="StringHelpers.fs" />
     <Compile Include="ArrayHelpers.fs" />
     <Compile Include="Dimensions.fs" />
     <Compile Include="Location.fs" />
@@ -16,6 +17,7 @@
     <Compile Include="Move.fs" />
     <Compile Include="Keys.fs" />
     <Compile Include="Draw.fs" />
+    <Compile Include="Score.fs" />
     <Compile Include="Scene.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

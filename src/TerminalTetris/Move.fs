@@ -8,7 +8,7 @@ let private getCellCoordinates (activeBlock: Block.Block) rowIndex =
 let private setCellAtLocation (gameGrid: GameGrid.Grid) (location: Location.Location) =
     let row = Array.tryItem location.Y gameGrid.Rows |> Option.defaultValue Array.empty
     
-    ArrayHelpers.trySet row location.X true
+    ArrayHelpers.trySet row (uint32 location.X) true
 
 let private removeFullRows (gameGrid: GameGrid.Grid) =
     let newRows = ResizeArray<Row.Row>()

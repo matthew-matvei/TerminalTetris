@@ -18,6 +18,7 @@ let main _ =
         gameGrid <- GameGrid.update gameGrid gameGridUpdater
         GameGrid.render gameGrid |> Scene.drawGameGrid
         Block.render gameGrid.NextBlock |> Scene.drawNextBlock
+        Score.render 10u |> Scene.drawScore
 
     GameEngine.run (fun _ -> updateGrid Move.blockDown)
     GameEngine.waitForKey (Keys.applyKeyEvent >> updateGrid)
