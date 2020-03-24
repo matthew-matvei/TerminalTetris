@@ -3,7 +3,11 @@ module GameGrid
 type Grid =
     { Rows: Row.Row[]
       ActiveBlock: Option<Block.Block>
-      NextBlock: Block.Block }
+      NextBlock: Block.Block
+      [<CLIEvent>]
+      GameEvent: GameEvent.GameEvent }
+
+let mutable private gameEventObservable = Option<IEvent<GameEvent.Args>>.None
 
 let create (dimensions: Dimensions.Dimensions) =
     let nextBlock = Block.generateRandom()
@@ -11,14 +15,19 @@ let create (dimensions: Dimensions.Dimensions) =
     let numRows = int dimensions.Height
     let numColumns = int dimensions.Width
 
+    let gameEvent = new GameEvent.GameEvent()
+    gameEventObservable <- Some(gameEvent.Publish)
+
     { Rows = Array.create numRows (Array.create numColumns false)
       ActiveBlock = Option<Block.Block>.None
-      NextBlock = { nextBlock with Location = { X = numColumns / 2; Y = -yOffset } } }
+      NextBlock = { nextBlock with Location = { X = numColumns / 2; Y = -yOffset } }
+      GameEvent = gameEvent }
 
 let private copy gameGrid = {
     Rows = Array.map Row.copy gameGrid.Rows
     ActiveBlock = gameGrid.ActiveBlock
-    NextBlock = gameGrid.NextBlock }
+    NextBlock = gameGrid.NextBlock
+    GameEvent = gameGrid.GameEvent }
 
 let update gameGrid (updateFunction: Grid -> Grid) = copy gameGrid |> updateFunction
 let addBlock (gameGrid: Grid) =
@@ -170,3 +179,9 @@ let activeBlockCanMove (gameGrid: Grid) (direction: Direction.Direction) =
     | Direction.Right -> blockCanMoveRight gameGrid
     | Direction.Down -> blockCanMoveDown gameGrid
     | Direction.Rotate -> blockCanRotate gameGrid
+
+let addGameEventHandler (eventHandler: GameEvent.Args -> unit) =
+    if gameEventObservable.IsNone then
+        ignore()
+
+    gameEventObservable.Value.Add(eventHandler)

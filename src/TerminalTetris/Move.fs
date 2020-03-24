@@ -33,14 +33,14 @@ let private fuseBlockWithGrid (gameGrid: GameGrid.Grid) =
 
         { gameGrid with ActiveBlock = Option<Block.Block>.None }
 
-let private moveBlockDown gameGrid (incrementGameSpeed: unit -> unit) =
+let private moveBlockDown gameGrid =
     if GameGrid.activeBlockCanMove gameGrid Direction.Down then
         { gameGrid with ActiveBlock = Some(Block.move Direction.Down gameGrid.ActiveBlock.Value) }
     else
         let (grid, removedRowCount) = fuseBlockWithGrid gameGrid |> removeFullRows
 
         if removedRowCount > 0 then
-            incrementGameSpeed()
+            grid.GameEvent.Trigger (GameEvent.Args.RowsCleared(removedRowCount))
 
         grid
 
@@ -48,7 +48,7 @@ let blockDown (gameGrid: GameGrid.Grid) =
     if gameGrid.ActiveBlock.IsNone then
         GameGrid.addBlock gameGrid
     else
-        moveBlockDown gameGrid GameEngine.incrementGameSpeed
+        moveBlockDown gameGrid
 
 let blockRight (gameGrid: GameGrid.Grid) =
     if GameGrid.activeBlockCanMove gameGrid Direction.Right then
