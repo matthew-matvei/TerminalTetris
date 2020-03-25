@@ -5,11 +5,17 @@ open System.Collections.Concurrent
 
 let private printQueue = new ConcurrentQueue<Location.Location * string>()
 
-let printAt (location: Location.Location) (value: string) =
-    printQueue.Enqueue((location, value))
-
+let private doWork _ =
     while not printQueue.IsEmpty do
         let success, (l, v) = printQueue.TryDequeue()
         if success then
             Console.SetCursorPosition(l.X, l.Y)
             printf "%s" v
+
+let private timer = new Timers.Timer(40.0)
+timer.Elapsed.Add(fun _ -> doWork())
+timer.AutoReset <- true
+timer.Enabled <- true
+
+let printAt (location: Location.Location) (value: string) =
+    printQueue.Enqueue((location, value))
