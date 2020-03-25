@@ -9,8 +9,10 @@ let private doWork _ =
     while not printQueue.IsEmpty do
         let success, (l, v) = printQueue.TryDequeue()
         if success then
-            Console.SetCursorPosition(l.X, l.Y)
-            printf "%s" v
+            lock printQueue (fun _ ->
+                Console.SetCursorPosition(l.X, l.Y)
+                printf "%s" v
+            )
 
 let private timer = new Timers.Timer(40.0)
 timer.Elapsed.Add(fun _ -> doWork())
