@@ -1,5 +1,7 @@
 ﻿module Scene
 
+open System
+
 let getGameGridDimensions _ =
     { Dimensions.Height = 10;
       Dimensions.Width = 5 }
@@ -22,6 +24,23 @@ let private matrixAtLocation (location: Location.Location) (matrix: string[][]) 
             if previousValue.IsNone || previousValue.Value <> currentValue then
                 Draw.printAt { X = location.X + columnIndex; Y = location.Y + rowIndex } currentValue
 
+let private valueAtLocation (location: Location.Location) (value: string) (previousValue: Option<string>) =
+    let maxValueLength = Math.Max(value.Length, Option.map String.length previousValue |> Option.defaultValue 0)
+
+    for characterIndex in seq { 0 .. maxValueLength - 1 } do
+        let previousValue = previousValue |> Option.bind (StringHelpers.tryItem (uint32 characterIndex))
+        let currentValue = value |> StringHelpers.tryItem (uint32 characterIndex)
+
+        match (previousValue, currentValue) with
+        | (previous, current) when previous.IsSome && current.IsSome && previous.Value = current.Value ->
+            ignore()
+        | (_, current) when current.IsSome ->
+            string current.Value |> Draw.printAt { X = location.X + characterIndex; Y = location.Y }
+        | (_, current) when current.IsNone ->
+            " " |> Draw.printAt { X = location.X + characterIndex; Y = location.Y }
+        | (_, __) ->
+            ignore()
+
 let mutable private previousGameGrid = Option<string[][]>.None
 
 let drawGameGrid (grid: string[][]) =
@@ -37,3 +56,12 @@ let drawNextBlock (nextBlock: string[][]) =
 
     matrixAtLocation location nextBlock previousNextBlock
     previousNextBlock <- Some(nextBlock)
+
+let mutable private previousScore = Option<string>.None
+
+let drawScore (score: string) =
+    let location =
+        { Location.X = getGameGridDimensions().Width + 6
+          Location.Y = 4 }
+
+    valueAtLocation location score previousScore

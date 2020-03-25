@@ -13,11 +13,15 @@ let main _ =
     GameGrid.addGameEventHandler (fun gameEventArgs ->
         match gameEventArgs with
         | GameEvent.Args.RowsCleared _ -> GameEngine.incrementGameSpeed ())
+    GameGrid.addGameEventHandler (fun gameEventArgs ->
+        match gameEventArgs with
+        | GameEvent.Args.RowsCleared rowsCleared -> uint32 rowsCleared |> Score.incrementByRowsCleared)
 
     let updateGrid (gameGridUpdater) =
         gameGrid <- GameGrid.update gameGrid gameGridUpdater
         GameGrid.render gameGrid |> Scene.drawGameGrid
         Block.render gameGrid.NextBlock |> Scene.drawNextBlock
+        Score.currentScore() |> Score.render |> Scene.drawScore
 
     GameEngine.run (fun _ -> updateGrid Move.blockDown)
     GameEngine.waitForKey (Keys.applyKeyEvent >> updateGrid)
