@@ -1,11 +1,13 @@
-module Draw
+namespace TerminalTetris
 
 open System
 
-let private sync = new Object()
+module Draw =
 
-let printAt (location: Location.Location) (value: string) =
-    lock sync (fun _ ->
-        Console.SetCursorPosition(location.X, location.Y)
-        printf "%s" value
-    )
+    let private sync = new Object()
+
+    let printAt (location: Location) (value: string) =
+        lock sync (fun _ ->
+            Console.SetCursorPosition(location.X, location.Y)
+            printf "%s" value
+        )

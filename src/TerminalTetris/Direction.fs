@@ -1,6 +1,6 @@
-module Direction
+namespace TerminalTetris
 
-type Direction = 
+type Direction =
     | Left
     | Right
     | Down

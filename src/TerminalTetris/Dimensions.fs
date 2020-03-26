@@ -1,4 +1,4 @@
-﻿module Dimensions
+﻿namespace TerminalTetris
 
 type Dimensions =
     { Height: int

@@ -1,9 +1,11 @@
-module Row
+namespace TerminalTetris
 
 type Row = bool[]
 
-let copy (row: Row) =
-    Array.copy row
+module Row =
 
-let isFull (row: Row) =
-    Array.forall id row
+    let copy (row: Row) =
+        Array.copy row
+
+    let isFull (row: Row) =
+        Array.forall id row
