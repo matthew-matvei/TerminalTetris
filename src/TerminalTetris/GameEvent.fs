@@ -1,6 +1,6 @@
-module GameEvent
+namespace TerminalTetris
 
-type Args =
+type GameEventArgs =
     RowsCleared of int
 
-type GameEvent = Event<Args>
+type GameEvent = Event<GameEventArgs>
