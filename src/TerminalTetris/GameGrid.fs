@@ -42,12 +42,13 @@ module GameGrid =
             NextBlock = { nextBlock with Location = { X = columnCount / 2; Y = -yOffset } } }
 
     let private activeBlockPresent (activeBlock: Block option) (gameGridLocation: Location) =
-        if activeBlock.IsNone then
-            false
-        else
-            Array.tryItem (gameGridLocation.Y - activeBlock.Value.Location.Y) activeBlock.Value.Rows
-                |> Option.bind (fun r -> Array.tryItem (gameGridLocation.X - activeBlock.Value.Location.X) r)
-                |> Option.defaultValue false
+        match activeBlock with
+            | None -> false
+            | Some block ->
+                block.Rows
+                    |> Array.tryItem (gameGridLocation.Y - block.Location.Y)
+                    |> Option.bind (fun r -> Array.tryItem (gameGridLocation.X - block.Location.X) r)
+                    |> Option.defaultValue false
 
     let private gameGridBlockPresent (gameGrid: GameGrid) (gameGridLocation: Location) =
         if activeBlockPresent gameGrid.ActiveBlock gameGridLocation then
@@ -86,94 +87,94 @@ module GameGrid =
             [| Array.create (grid.Rows.[0].Length + 2) "=" |]
 
     let private blockCanMoveLeft (gameGrid: GameGrid) =
-        if gameGrid.ActiveBlock.IsNone then
-            false
-        else
-            let startingX = gameGrid.ActiveBlock.Value.Location.X
-            let startingY = gameGrid.ActiveBlock.Value.Location.Y
-            let firstActiveBlockRow = Seq.tryHead gameGrid.ActiveBlock.Value.Rows |> Option.defaultValue Array.empty
+        match gameGrid.ActiveBlock with
+            | None -> false
+            | Some activeBlock ->
+                let startingX = activeBlock.Location.X
+                let startingY = activeBlock.Location.Y
+                let firstActiveBlockRow = Seq.tryHead activeBlock.Rows |> Option.defaultValue Array.empty
 
-            let obstructionToLeftOfColumn columnIndex =
-                if startingX + columnIndex = 0 then
-                    true
-                else
-                    let obstructionToLeftOfCell rowIndex =
-                        activeBlockPresent gameGrid.ActiveBlock { Y = startingY + rowIndex; X = startingX + columnIndex }
-                            && gameGridBlockPresent gameGrid { Y = startingY + rowIndex; X = startingX + columnIndex - 1 }
+                let obstructionToLeftOfColumn columnIndex =
+                    if startingX + columnIndex = 0 then
+                        true
+                    else
+                        let obstructionToLeftOfCell rowIndex =
+                            activeBlockPresent (Some activeBlock) { Y = startingY + rowIndex; X = startingX + columnIndex }
+                                && gameGridBlockPresent gameGrid { Y = startingY + rowIndex; X = startingX + columnIndex - 1 }
 
-                    Seq.exists obstructionToLeftOfCell (seq { 0 .. gameGrid.ActiveBlock.Value.Rows.Length - 1 })
+                        Seq.exists obstructionToLeftOfCell (seq { 0 .. activeBlock.Rows.Length - 1 })
 
-            not (Seq.exists obstructionToLeftOfColumn (seq { 0 .. firstActiveBlockRow.Length - 1 }))
+                not (Seq.exists obstructionToLeftOfColumn (seq { 0 .. firstActiveBlockRow.Length - 1 }))
 
     let private blockCanMoveRight (gameGrid: GameGrid) =
-        if gameGrid.ActiveBlock.IsNone then
-            false
-        else
-            let startingX = gameGrid.ActiveBlock.Value.Location.X
-            let startingY = gameGrid.ActiveBlock.Value.Location.Y
-            let firstRow = Seq.tryHead gameGrid.Rows |> Option.defaultValue Array.empty
-            let firstActiveBlockRow = Seq.tryHead gameGrid.ActiveBlock.Value.Rows |> Option.defaultValue Array.empty
+        match gameGrid.ActiveBlock with
+            | None -> false
+            | Some activeBlock ->
+                let startingX = activeBlock.Location.X
+                let startingY = activeBlock.Location.Y
+                let firstRow = Seq.tryHead gameGrid.Rows |> Option.defaultValue Array.empty
+                let firstActiveBlockRow = Seq.tryHead activeBlock.Rows |> Option.defaultValue Array.empty
 
-            let obstructionToRightOfColumn columnIndex =
-                if firstRow.Length <= startingX + columnIndex + 1 then
-                    true
-                else
-                    let obstructionToRightOfCell rowIndex =
-                        activeBlockPresent gameGrid.ActiveBlock { Y = startingY + rowIndex; X = startingX + columnIndex }
-                            && gameGridBlockPresent gameGrid { Y = startingY + rowIndex; X = startingX + columnIndex + 1 }
+                let obstructionToRightOfColumn columnIndex =
+                    if firstRow.Length <= startingX + columnIndex + 1 then
+                        true
+                    else
+                        let obstructionToRightOfCell rowIndex =
+                            activeBlockPresent (Some activeBlock) { Y = startingY + rowIndex; X = startingX + columnIndex }
+                                && gameGridBlockPresent gameGrid { Y = startingY + rowIndex; X = startingX + columnIndex + 1 }
 
-                    Seq.exists obstructionToRightOfCell (seq { 0 .. gameGrid.ActiveBlock.Value.Rows.Length - 1 })
+                        Seq.exists obstructionToRightOfCell (seq { 0 .. activeBlock.Rows.Length - 1 })
 
-            not (Seq.exists obstructionToRightOfColumn (seq { 0 .. firstActiveBlockRow.Length - 1 }))
+                not (Seq.exists obstructionToRightOfColumn (seq { 0 .. firstActiveBlockRow.Length - 1 }))
 
     let private blockCanMoveDown (gameGrid: GameGrid) =
-        if gameGrid.ActiveBlock.IsNone then
-            false
-        else
-            let startingX = gameGrid.ActiveBlock.Value.Location.X
-            let startingY = gameGrid.ActiveBlock.Value.Location.Y
+        match gameGrid.ActiveBlock with
+            | None -> false
+            | Some activeBlock ->
+                let startingX = activeBlock.Location.X
+                let startingY = activeBlock.Location.Y
 
-            let obstructionBelowRow rowIndex =
-                if gameGrid.Rows.Length <= startingY + rowIndex + 1 then
-                    true
-                else
-                    let row = Array.tryItem rowIndex gameGrid.ActiveBlock.Value.Rows |> Option.defaultValue Array.empty
-                    let obstructionBelowCell columnIndex =
-                        activeBlockPresent gameGrid.ActiveBlock { Y = startingY + rowIndex; X = startingX + columnIndex }
-                            && gameGridBlockPresent gameGrid { Y = startingY + rowIndex + 1; X = startingX + columnIndex }
+                let obstructionBelowRow rowIndex =
+                    if gameGrid.Rows.Length <= startingY + rowIndex + 1 then
+                        true
+                    else
+                        let row = Array.tryItem rowIndex activeBlock.Rows |> Option.defaultValue Array.empty
+                        let obstructionBelowCell columnIndex =
+                            activeBlockPresent (Some activeBlock) { Y = startingY + rowIndex; X = startingX + columnIndex }
+                                && gameGridBlockPresent gameGrid { Y = startingY + rowIndex + 1; X = startingX + columnIndex }
 
-                    Seq.exists obstructionBelowCell (seq { 0 .. row.Length - 1 })
+                        Seq.exists obstructionBelowCell (seq { 0 .. row.Length - 1 })
 
-            not (Seq.exists obstructionBelowRow (seq { 0 .. gameGrid.ActiveBlock.Value.Rows.Length - 1 }))
+                not (Seq.exists obstructionBelowRow (seq { 0 .. gameGrid.ActiveBlock.Value.Rows.Length - 1 }))
 
     let private blockCanRotate (gameGrid: GameGrid) =
-        if gameGrid.ActiveBlock.IsNone then
-            false
-        else
-            let rotatedActiveBlock = Block.rotate gameGrid.ActiveBlock.Value
-            let startingX = rotatedActiveBlock.Location.X
-            let startingY = rotatedActiveBlock.Location.Y
+        match gameGrid.ActiveBlock with
+            | None -> false
+            | Some activeBlock ->
+                let rotatedActiveBlock = Block.rotate activeBlock
+                let startingX = rotatedActiveBlock.Location.X
+                let startingY = rotatedActiveBlock.Location.Y
 
-            let rowHasObstruction rowIndex =
-                let row = Array.tryItem rowIndex rotatedActiveBlock.Rows |> Option.defaultValue Array.empty
+                let rowHasObstruction rowIndex =
+                    let row = Array.tryItem rowIndex rotatedActiveBlock.Rows |> Option.defaultValue Array.empty
 
-                let cellHasObstruction columnIndex =
-                    activeBlockPresent (Some(rotatedActiveBlock)) { X = startingX + columnIndex; Y = startingY + rowIndex }
-                        && gameGridBlockPresent gameGrid { X = startingX + columnIndex; Y = startingY + rowIndex }
+                    let cellHasObstruction columnIndex =
+                        activeBlockPresent (Some(rotatedActiveBlock)) { X = startingX + columnIndex; Y = startingY + rowIndex }
+                            && gameGridBlockPresent gameGrid { X = startingX + columnIndex; Y = startingY + rowIndex }
 
-                let cellOutsideBoundary columnIndex =
-                    let gameGridRow = Array.tryHead gameGrid.Rows |> Option.defaultValue Array.empty
-                    let outsideBoundary =
-                        startingY + rowIndex >= gameGrid.Rows.Length
-                            || startingX + columnIndex >= gameGridRow.Length
-                            || startingX + columnIndex < 0
+                    let cellOutsideBoundary columnIndex =
+                        let gameGridRow = Array.tryHead gameGrid.Rows |> Option.defaultValue Array.empty
+                        let outsideBoundary =
+                            startingY + rowIndex >= gameGrid.Rows.Length
+                                || startingX + columnIndex >= gameGridRow.Length
+                                || startingX + columnIndex < 0
 
-                    activeBlockPresent (Some(rotatedActiveBlock)) { X = startingX + columnIndex; Y = startingY + rowIndex }
-                        && outsideBoundary
+                        activeBlockPresent (Some(rotatedActiveBlock)) { X = startingX + columnIndex; Y = startingY + rowIndex }
+                            && outsideBoundary
 
-                Seq.exists (fun columnIndex -> cellHasObstruction columnIndex || cellOutsideBoundary columnIndex) (seq { 0 .. row.Length - 1 })
+                    Seq.exists (fun columnIndex -> cellHasObstruction columnIndex || cellOutsideBoundary columnIndex) (seq { 0 .. row.Length - 1 })
 
-            not (Seq.exists rowHasObstruction (seq { 0 .. rotatedActiveBlock.Rows.Length - 1 }))
+                not (Seq.exists rowHasObstruction (seq { 0 .. rotatedActiveBlock.Rows.Length - 1 }))
 
     let activeBlockCanMove (gameGrid: GameGrid) (direction: Direction) =
         match direction with
@@ -183,7 +184,6 @@ module GameGrid =
         | Direction.Rotate -> blockCanRotate gameGrid
 
     let addGameEventHandler (eventHandler: GameEventArgs -> unit) =
-        if gameEventObservable.IsNone then
-            ignore()
-
-        gameEventObservable.Value.Add(eventHandler)
+        match gameEventObservable with
+            | None -> ignore()
+            | Some observable -> observable.Add(eventHandler)

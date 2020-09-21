@@ -26,10 +26,10 @@ module Move =
         ({ gameGrid with Rows = newRows.ToArray() }, removedRowCount)
 
     let private fuseBlockWithGrid (gameGrid: GameGrid) =
-        if gameGrid.ActiveBlock.IsNone then
-            gameGrid
-        else
-            let cellCoordinates = Seq.collect (fun rowIndex -> getCellCoordinates gameGrid.ActiveBlock.Value rowIndex) (seq { 0 .. gameGrid.ActiveBlock.Value.Rows.Length - 1 })
+        match gameGrid.ActiveBlock with
+        | None -> gameGrid
+        | Some activeBlock ->
+            let cellCoordinates = Seq.collect (fun rowIndex -> getCellCoordinates activeBlock rowIndex) (seq { 0 .. activeBlock.Rows.Length - 1 })
             for coords in cellCoordinates do
                 setCellAtLocation gameGrid coords
 

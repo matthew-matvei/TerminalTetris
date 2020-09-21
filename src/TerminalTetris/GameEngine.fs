@@ -16,18 +16,16 @@ let waitForKey (keyPressHandler: ConsoleKeyInfo -> unit) =
         Console.ReadKey() |> keyPressHandler
 
 let private incrementGameSpeed (_: unit) =
-    if timer.IsNone then
-        ignore()
-
-    let decrement = 0.1 * timer.Value.Interval
-    let currentInterval = timer.Value.Interval
-    timer.Value.Interval <- currentInterval - decrement
+    match timer with
+        | None -> ignore()
+        | Some t ->
+            let decrement = 0.1 * t.Interval
+            t.Interval <- t.Interval - decrement
 
 let private stop (_: unit) =
-    if timer.IsNone then
-        ignore()
-
-    timer.Value.Stop()
+    match timer with
+        | None -> ignore()
+        | Some t -> t.Stop()
 
 let handleGameEvent (gameEventArgs: GameEventArgs) =
     match gameEventArgs with
