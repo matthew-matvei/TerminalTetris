@@ -39,12 +39,16 @@ module Move =
         if GameGrid.activeBlockCanMove gameGrid Direction.Down then
             { gameGrid with ActiveBlock = Some(Block.move Direction.Down gameGrid.ActiveBlock.Value) }
         else
-            let (grid, removedRowCount) = fuseBlockWithGrid gameGrid |> removeFullRows
+            if (gameGrid.ActiveBlock.Value.Location.Y + gameGrid.ActiveBlock.Value.Rows.Length < 4) then
+                gameGrid.GameEvent.Trigger (GameEventArgs.GameOver)
+                gameGrid
+            else
+                let (grid, removedRowCount) = fuseBlockWithGrid gameGrid |> removeFullRows
 
-            if removedRowCount > 0 then
-                grid.GameEvent.Trigger (GameEventArgs.RowsCleared(removedRowCount))
+                if removedRowCount > 0 then
+                    grid.GameEvent.Trigger (GameEventArgs.RowsCleared(removedRowCount))
 
-            grid
+                grid
 
     let blockDown (gameGrid: GameGrid) =
         if gameGrid.ActiveBlock.IsNone then
