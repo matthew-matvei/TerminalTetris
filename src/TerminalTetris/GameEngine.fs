@@ -1,6 +1,7 @@
 module GameEngine
 
 open System
+open TerminalTetris
 
 let mutable private timer = Option<Timers.Timer>.None
 
@@ -10,7 +11,11 @@ let run (tick: unit -> unit) =
     timer.Value.AutoReset <- true
     timer.Value.Enabled <- true
 
-let incrementGameSpeed (_: unit) =
+let waitForKey (keyPressHandler: ConsoleKeyInfo -> unit) =
+    while true do
+        Console.ReadKey() |> keyPressHandler
+
+let private incrementGameSpeed (_: unit) =
     if timer.IsNone then
         ignore()
 
@@ -18,6 +23,13 @@ let incrementGameSpeed (_: unit) =
     let currentInterval = timer.Value.Interval
     timer.Value.Interval <- currentInterval - decrement
 
-let waitForKey (keyPressHandler: ConsoleKeyInfo -> unit) =
-    while true do
-        Console.ReadKey() |> keyPressHandler
+let private stop (_: unit) =
+    if timer.IsNone then
+        ignore()
+
+    timer.Value.Stop()
+
+let handleGameEvent (gameEventArgs: GameEventArgs) =
+    match gameEventArgs with
+    | GameEventArgs.RowsCleared _ -> incrementGameSpeed ()
+    | GameEventArgs.GameOver -> stop ()

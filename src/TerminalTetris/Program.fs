@@ -14,12 +14,8 @@ module Program =
 
         let mutable gameGrid = Scene.getGameGridDimensions() |> GameGrid.create
 
-        GameGrid.addGameEventHandler (fun gameEventArgs ->
-            match gameEventArgs with
-            | GameEventArgs.RowsCleared _ -> GameEngine.incrementGameSpeed ())
-        GameGrid.addGameEventHandler (fun gameEventArgs ->
-            match gameEventArgs with
-            | GameEventArgs.RowsCleared rowsCleared -> uint32 rowsCleared |> Score.incrementByRowsCleared)
+        GameGrid.addGameEventHandler GameEngine.handleGameEvent
+        GameGrid.addGameEventHandler Score.handleGameEvent
 
         let updateGrid (gameGridUpdater) =
             gameGrid <- GameGrid.update gameGrid gameGridUpdater
