@@ -112,6 +112,10 @@ module Block =
                         Y = block.Location.Y + 1 } }
         | Rotate -> rotate block
 
+    let tryItem row column block =
+        Array.tryItem (int row) block.Rows
+            |> Option.bind (fun item -> Array.tryItem (int column) item)
+
     let render (block: Block) =
         let largestHeight = 4
         let largestWidth = 4
@@ -119,8 +123,7 @@ module Block =
         let renderRow rowIndex =
             let renderCell columnIndex =
                 let cell =
-                    Array.tryItem rowIndex block.Rows
-                    |> Option.bind (Array.tryItem columnIndex)
+                    tryItem rowIndex columnIndex block
                     |> Option.defaultValue false
 
                 if cell then "X" else " "
@@ -128,9 +131,5 @@ module Block =
             Seq.map renderCell (seq { 0 .. largestWidth - 1 })
             |> Seq.toArray
 
-        Seq.map renderRow (seq { 0 .. largestHeight - 1 }) 
+        Seq.map renderRow (seq { 0 .. largestHeight - 1 })
         |> Seq.toArray
-
-    let tryItem (row: uint32) (column: uint32) (block: Block) =
-        Array.tryItem (int row) block.Rows
-            |> Option.bind (fun item -> Array.tryItem (int column) item)

@@ -18,8 +18,7 @@ module Scene =
             for columnIndex in seq { 0 .. rowLength - 1 } do
                 let previousValue =
                     previousMatrix
-                    |> Option.bind (Array.tryItem rowIndex)
-                    |> Option.bind (Array.tryItem columnIndex)
+                    |> Option.bind (ArrayHelpers2D.tryItem rowIndex columnIndex)
 
                 let currentValue = Array.item rowIndex matrix |> Array.item columnIndex
 
@@ -35,8 +34,8 @@ module Scene =
         let maxValueLength = Math.Max(value.Length, Option.map String.length previousValue |> Option.defaultValue 0)
 
         for characterIndex in seq { 0 .. maxValueLength - 1 } do
-            let previousValue = previousValue |> Option.bind (StringHelpers.tryItem (uint32 characterIndex))
-            let currentValue = value |> StringHelpers.tryItem (uint32 characterIndex)
+            let previousValue = previousValue |> (Option.bind << StringHelpers.tryItem << uint32) characterIndex
+            let currentValue = value |> (StringHelpers.tryItem << uint32) characterIndex
 
             match (previousValue, currentValue) with
             | (Some previous, Some current) when previous = current ->

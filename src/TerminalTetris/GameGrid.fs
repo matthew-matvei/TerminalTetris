@@ -50,21 +50,24 @@ module GameGrid =
                   { nextBlock with
                         Location = { X = columnCount / 2; Y = -yOffset } } }
 
+    let private tryItem row column gameGrid =
+        Array.tryItem row gameGrid.Rows
+        |> Option.bind (Array.tryItem column)
+
     let private activeBlockPresent (activeBlock: Block option) (gameGridLocation: Location) =
         match activeBlock with
         | None -> false
         | Some block ->
-            let x, y = gameGridLocation.X - block.Location.X |> uint32,
-                        gameGridLocation.Y - block.Location.Y |> uint32
-                in
-                Block.tryItem y x block |> Option.defaultValue false
+            let x, y = gameGridLocation.X - block.Location.X,
+                        gameGridLocation.Y - block.Location.Y
+
+            Block.tryItem y x block |> Option.defaultValue false
 
     let private gameGridBlockPresent (gameGrid: GameGrid) (gameGridLocation: Location) =
         if activeBlockPresent gameGrid.ActiveBlock gameGridLocation then
             false
         else
-            Array.tryItem gameGridLocation.Y gameGrid.Rows
-            |> Option.bind (Array.tryItem gameGridLocation.X)
+            tryItem gameGridLocation.Y gameGridLocation.X gameGrid
             |> Option.defaultValue false
 
     let private renderCell rowIndex columnIndex (grid: GameGrid) =
