@@ -20,7 +20,7 @@ module GameGrid =
         let gameEvent = new GameEvent()
         gameEventObservable <- Some(gameEvent.Publish)
 
-        { Rows = Array.create numRows (Array.create numColumns false)
+        { Rows = Array.create numColumns false |> Array.create numRows
           ActiveBlock = Option<Block>.None
           NextBlock =
               { nextBlock with
@@ -103,9 +103,10 @@ module GameGrid =
             let startingX = activeBlock.Location.X
             let startingY = activeBlock.Location.Y
 
-            let firstActiveBlockRow =
+            let firstActiveBlockRowLength =
                 Seq.tryHead activeBlock.Rows
                 |> Option.defaultValue Array.empty
+                |> Array.length
 
             let obstructionToLeftOfColumn columnIndex =
                 if startingX + columnIndex = 0 then
@@ -123,7 +124,7 @@ module GameGrid =
 
                     Seq.exists obstructionToLeftOfCell (seq { 0 .. activeBlock.Rows.Length - 1 })
 
-            not (Seq.exists obstructionToLeftOfColumn (seq { 0 .. firstActiveBlockRow.Length - 1 }))
+            not (Seq.exists obstructionToLeftOfColumn (seq { 0 .. firstActiveBlockRowLength - 1 }))
 
     let private blockCanMoveRight (gameGrid: GameGrid) =
         match gameGrid.ActiveBlock with
@@ -132,16 +133,18 @@ module GameGrid =
             let startingX = activeBlock.Location.X
             let startingY = activeBlock.Location.Y
 
-            let firstRow =
+            let firstRowLength =
                 Seq.tryHead gameGrid.Rows
                 |> Option.defaultValue Array.empty
+                |> Array.length
 
-            let firstActiveBlockRow =
+            let firstActiveBlockRowLength =
                 Seq.tryHead activeBlock.Rows
                 |> Option.defaultValue Array.empty
+                |> Array.length
 
             let obstructionToRightOfColumn columnIndex =
-                if firstRow.Length <= startingX + columnIndex + 1 then
+                if firstRowLength <= startingX + columnIndex + 1 then
                     true
                 else
                     let obstructionToRightOfCell rowIndex =
@@ -156,7 +159,7 @@ module GameGrid =
 
                     Seq.exists obstructionToRightOfCell (seq { 0 .. activeBlock.Rows.Length - 1 })
 
-            not (Seq.exists obstructionToRightOfColumn (seq { 0 .. firstActiveBlockRow.Length - 1 }))
+            not (Seq.exists obstructionToRightOfColumn (seq { 0 .. firstActiveBlockRowLength - 1 }))
 
     let private blockCanMoveDown (gameGrid: GameGrid) =
         match gameGrid.ActiveBlock with
@@ -169,9 +172,10 @@ module GameGrid =
                 if gameGrid.Rows.Length <= startingY + rowIndex + 1 then
                     true
                 else
-                    let row =
+                    let rowLength =
                         Array.tryItem rowIndex activeBlock.Rows
                         |> Option.defaultValue Array.empty
+                        |> Array.length
 
                     let obstructionBelowCell columnIndex =
                         activeBlockPresent
@@ -183,7 +187,7 @@ module GameGrid =
                                { Y = startingY + rowIndex + 1
                                  X = startingX + columnIndex }
 
-                    Seq.exists obstructionBelowCell (seq { 0 .. row.Length - 1 })
+                    Seq.exists obstructionBelowCell (seq { 0 .. rowLength - 1 })
 
             not (Seq.exists obstructionBelowRow (seq { 0 .. gameGrid.ActiveBlock.Value.Rows.Length - 1 }))
 
@@ -211,15 +215,16 @@ module GameGrid =
                              Y = startingY + rowIndex }
 
                 let cellOutsideBoundary columnIndex =
-                    let gameGridRow =
+                    let gameGridRowLength =
                         Array.tryHead gameGrid.Rows
                         |> Option.defaultValue Array.empty
+                        |> Array.length
 
                     let outsideBoundary =
                         startingY
                         + rowIndex
                         >= gameGrid.Rows.Length
-                        || startingX + columnIndex >= gameGridRow.Length
+                        || startingX + columnIndex >= gameGridRowLength
                         || startingX + columnIndex < 0
 
                     activeBlockPresent

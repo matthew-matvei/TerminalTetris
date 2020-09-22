@@ -80,7 +80,7 @@ module Block =
         let columnCount = Array.head block.Rows |> Array.length
 
         let createRowFromColumn columnIndex =
-            Array.map (fun r -> Array.item columnIndex r) block.Rows
+            Array.map (Array.item columnIndex) block.Rows
 
         let newRows =
             Seq.map (createRowFromColumn >> Array.rev) (seq { 0 .. columnCount - 1 })
