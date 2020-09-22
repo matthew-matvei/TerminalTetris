@@ -23,8 +23,13 @@ module Scene =
 
                 let currentValue = Array.item rowIndex matrix |> Array.item columnIndex
 
-                if previousValue.IsNone || previousValue.Value <> currentValue then
-                    Draw.printAt { X = location.X + columnIndex; Y = location.Y + rowIndex } currentValue
+                let print value =
+                    Draw.printAt { X = location.X + columnIndex; Y = location.Y + rowIndex } value
+
+                match previousValue with
+                | None -> print currentValue
+                | Some v when v <> currentValue -> print currentValue
+                | _ -> ignore()
 
     let private valueAtLocation (location: Location) (value: string) (previousValue: Option<string>) =
         let maxValueLength = Math.Max(value.Length, Option.map String.length previousValue |> Option.defaultValue 0)
@@ -34,11 +39,11 @@ module Scene =
             let currentValue = value |> StringHelpers.tryItem (uint32 characterIndex)
 
             match (previousValue, currentValue) with
-            | (previous, current) when previous.IsSome && current.IsSome && previous.Value = current.Value ->
+            | (Some previous, Some current) when previous = current ->
                 ignore()
-            | (_, current) when current.IsSome ->
-                string current.Value |> Draw.printAt { X = location.X + characterIndex; Y = location.Y }
-            | (_, current) when current.IsNone ->
+            | (_, Some current) ->
+                string current |> Draw.printAt { X = location.X + characterIndex; Y = location.Y }
+            | (_, None) ->
                 " " |> Draw.printAt { X = location.X + characterIndex; Y = location.Y }
             | (_, __) ->
                 ignore()
