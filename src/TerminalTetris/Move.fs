@@ -63,26 +63,21 @@ module Move =
 
             grid
 
+    let private moveBlockIf move expression gameGrid =
+        if expression then
+            { gameGrid with
+                ActiveBlock = Some(move gameGrid.ActiveBlock.Value)}
+        else
+            gameGrid
+
     let blockDown (gameGrid: GameGrid) =
         if gameGrid.ActiveBlock.IsNone then GameGrid.addBlock gameGrid else moveBlockDown gameGrid
 
     let blockRight (gameGrid: GameGrid) =
-        if GameGrid.activeBlockCanMove gameGrid Right then
-            { gameGrid with
-                  ActiveBlock = Some(Block.move Right gameGrid.ActiveBlock.Value) }
-        else
-            gameGrid
+        moveBlockIf (Block.move Right) (GameGrid.activeBlockCanMove gameGrid Right) gameGrid
 
     let blockLeft (gameGrid: GameGrid) =
-        if GameGrid.activeBlockCanMove gameGrid Left then
-            { gameGrid with
-                  ActiveBlock = Some(Block.move Left gameGrid.ActiveBlock.Value) }
-        else
-            gameGrid
+        moveBlockIf (Block.move Left) (GameGrid.activeBlockCanMove gameGrid Left) gameGrid
 
     let rotateBlock (gameGrid: GameGrid) =
-        if GameGrid.activeBlockCanMove gameGrid Rotate then
-            { gameGrid with
-                  ActiveBlock = Some(Block.move Rotate gameGrid.ActiveBlock.Value) }
-        else
-            gameGrid
+        moveBlockIf (Block.move Rotate) (GameGrid.activeBlockCanMove gameGrid Rotate) gameGrid
