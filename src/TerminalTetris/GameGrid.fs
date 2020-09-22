@@ -45,10 +45,10 @@ module GameGrid =
         match activeBlock with
             | None -> false
             | Some block ->
-                block.Rows
-                    |> Array.tryItem (gameGridLocation.Y - block.Location.Y)
-                    |> Option.bind (fun r -> Array.tryItem (gameGridLocation.X - block.Location.X) r)
-                    |> Option.defaultValue false
+                let x, y = gameGridLocation.X - block.Location.X |> uint32,
+                            gameGridLocation.Y - block.Location.Y |> uint32
+                 in
+                    Block.tryItem y x block |> Option.defaultValue false
 
     let private gameGridBlockPresent (gameGrid: GameGrid) (gameGridLocation: Location) =
         if activeBlockPresent gameGrid.ActiveBlock gameGridLocation then

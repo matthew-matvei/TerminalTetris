@@ -114,3 +114,7 @@ module Block =
             Seq.map renderCell (seq { 0 .. largestWidth - 1 }) |> Seq.toArray
 
         Seq.map renderRow (seq { 0 .. largestHeight - 1 }) |> Seq.toArray
+
+    let tryItem (row: uint32) (column: uint32) (block: Block) =
+        Array.tryItem (int row) block.Rows
+            |> Option.bind (fun item -> Array.tryItem (int column) item)
