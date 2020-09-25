@@ -2,6 +2,8 @@
 
 Simple game of Tetris in the Terminal
 
+![Playing Terminal Tetris](./assets/terminal-tetris.gif)
+
 ## How to install
 
 The game is distributed as a .NET tool. See its listing at `nuget.org` here:
