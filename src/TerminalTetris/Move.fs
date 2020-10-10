@@ -9,14 +9,14 @@ module Move =
             { Location.Y = rowIndex + activeBlock.Location.Y
               Location.X = columnIndex + activeBlock.Location.X })
 
-    let private setCellAtLocation (gameGrid: GameGrid) (location: Location) =
+    let private setCellAtLocation gameGrid location =
         let row =
             Array.tryItem location.Y gameGrid.Rows
             |> Option.defaultValue Array.empty
 
         ArrayHelpers.trySet row (uint32 location.X) true
 
-    let private removeFullRows (gameGrid: GameGrid) =
+    let private removeFullRows gameGrid =
         let newRows = ResizeArray<Row>()
         let mutable removedRowCount = 0
 
@@ -31,7 +31,7 @@ module Move =
                Rows = newRows.ToArray() },
          removedRowCount)
 
-    let private fuseBlockWithGrid (gameGrid: GameGrid) =
+    let private fuseBlockWithGrid gameGrid =
         match gameGrid.ActiveBlock with
         | None -> gameGrid
         | Some activeBlock ->
@@ -41,8 +41,7 @@ module Move =
             for coords in cellCoordinates do
                 setCellAtLocation gameGrid coords
 
-            { gameGrid with
-                  ActiveBlock = Option<Block>.None }
+            { gameGrid with ActiveBlock = None }
 
     let private moveBlockDown gameGrid =
         if GameGrid.activeBlockCanMove gameGrid Down then
@@ -66,18 +65,18 @@ module Move =
     let private moveBlockIf move expression gameGrid =
         if expression then
             { gameGrid with
-                ActiveBlock = Some(move gameGrid.ActiveBlock.Value)}
+                  ActiveBlock = Some(move gameGrid.ActiveBlock.Value) }
         else
             gameGrid
 
-    let blockDown (gameGrid: GameGrid) =
+    let blockDown gameGrid =
         if gameGrid.ActiveBlock.IsNone then GameGrid.addBlock gameGrid else moveBlockDown gameGrid
 
-    let blockRight (gameGrid: GameGrid) =
+    let blockRight gameGrid =
         moveBlockIf (Block.move Right) (GameGrid.activeBlockCanMove gameGrid Right) gameGrid
 
-    let blockLeft (gameGrid: GameGrid) =
+    let blockLeft gameGrid =
         moveBlockIf (Block.move Left) (GameGrid.activeBlockCanMove gameGrid Left) gameGrid
 
-    let rotateBlock (gameGrid: GameGrid) =
+    let rotateBlock gameGrid =
         moveBlockIf (Block.move Rotate) (GameGrid.activeBlockCanMove gameGrid Rotate) gameGrid

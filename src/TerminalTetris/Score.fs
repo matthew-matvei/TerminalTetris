@@ -2,20 +2,27 @@ module Score
 
 open TerminalTetris
 
-let mutable private _currentScore = 0u
-let mutable private _scoreIsFinal = false
+type private State =
+    { CurrentScore: uint32
+      ScoreIsFinal: bool }
+
+let mutable private _state =
+    { CurrentScore = 0u
+      ScoreIsFinal = false }
 
 let render (score: uint32) =
     "Score: "
     + score.ToString()
-    + (if _scoreIsFinal then " (Game Over)" else "")
+    + (if _state.ScoreIsFinal then " (Game Over)" else "")
 
-let currentScore _ = _currentScore
+let currentScore _ = _state.CurrentScore
 
-let private incrementByRowsCleared (rowsCleared: uint32) =
-    _currentScore <- _currentScore + rowsCleared
+let private incrementByRowsCleared rowsCleared =
+    _state <-
+        { _state with
+              CurrentScore = _state.CurrentScore + rowsCleared }
 
-let handleGameEvent (gameEventArgs: GameEventArgs) =
+let handleGameEvent gameEventArgs =
     match gameEventArgs with
     | RowsCleared rowsCleared -> uint32 rowsCleared |> incrementByRowsCleared
-    | GameOver -> _scoreIsFinal <- true
+    | GameOver -> _state <- { _state with ScoreIsFinal = true }

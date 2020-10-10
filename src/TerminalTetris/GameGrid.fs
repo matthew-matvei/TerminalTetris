@@ -11,7 +11,7 @@ module GameGrid =
 
     let mutable private gameEventObservable = Option<IEvent<GameEventArgs>>.None
 
-    let create (dimensions: Dimensions) =
+    let create dimensions =
         let nextBlock = Block.generateRandom ()
         let yOffset = nextBlock.Rows.Length
         let numRows = int dimensions.Height
@@ -20,8 +20,8 @@ module GameGrid =
         let gameEvent = new GameEvent()
         gameEventObservable <- Some(gameEvent.Publish)
 
-        { Rows = Array.create numColumns false |> Array.create numRows
-          ActiveBlock = Option<Block>.None
+        { Rows = Row.create numColumns |> Array.create numRows
+          ActiveBlock = None
           NextBlock =
               { nextBlock with
                     Location = { X = numColumns / 2; Y = -yOffset } }
@@ -35,12 +35,12 @@ module GameGrid =
 
     let update gameGrid (updateFunction: GameGrid -> GameGrid) = copy gameGrid |> updateFunction
 
-    let addBlock (gameGrid: GameGrid) =
-        let columnCount =
-            Array.tryHead gameGrid.Rows
-            |> Option.defaultValue Array.empty
-            |> Array.length
+    let private width gameGrid =
+        Array.tryHead gameGrid.Rows
+        |> Option.map Array.length
+        |> Option.defaultValue 0
 
+    let addBlock gameGrid =
         let nextBlock = Block.generateRandom ()
         let yOffset = nextBlock.Rows.Length
 
@@ -48,68 +48,59 @@ module GameGrid =
               ActiveBlock = Some(gameGrid.NextBlock)
               NextBlock =
                   { nextBlock with
-                        Location = { X = columnCount / 2; Y = -yOffset } } }
+                        Location = { X = width gameGrid / 2; Y = -yOffset } } }
 
     let private tryItem row column gameGrid =
         Array.tryItem row gameGrid.Rows
         |> Option.bind (Array.tryItem column)
 
-    let private activeBlockPresent (activeBlock: Block option) (gameGridLocation: Location) =
+    let private activeBlockPresent activeBlock gameGridLocation =
         match activeBlock with
         | None -> false
         | Some block ->
-            let x, y = gameGridLocation.X - block.Location.X,
-                        gameGridLocation.Y - block.Location.Y
+            let x, y =
+                gameGridLocation.X - block.Location.X, gameGridLocation.Y - block.Location.Y
 
-            Block.tryItem y x block |> Option.defaultValue false
+            Block.tryItem y x block
+            |> Option.defaultValue false
 
-    let private gameGridBlockPresent (gameGrid: GameGrid) (gameGridLocation: Location) =
+    let private gameGridBlockPresent gameGrid gameGridLocation =
         if activeBlockPresent gameGrid.ActiveBlock gameGridLocation then
             false
         else
             tryItem gameGridLocation.Y gameGridLocation.X gameGrid
             |> Option.defaultValue false
 
-    let private renderCell rowIndex columnIndex (grid: GameGrid) =
+    let private renderCell grid rowIndex columnIndex =
         if gameGridBlockPresent grid { Y = rowIndex; X = columnIndex }
            || activeBlockPresent grid.ActiveBlock { Y = rowIndex; X = columnIndex } then
             "X"
         else
             " "
 
-    let private renderRow rowIndex grid =
+    let private renderRow grid rowIndex =
         let bar () =
             if rowIndex >= 0 then [| "|" |] else [| " " |]
 
-        let rowlength =
-            Array.tryHead grid.Rows
-            |> Option.map Array.length
-            |> Option.defaultValue 0
-
         Array.concat [ bar ()
-                       Array.map (fun columnIndex -> renderCell rowIndex columnIndex grid)
-                           (Array.ofSeq (seq { 0 .. rowlength - 1 }))
+                       Seq.map (renderCell grid rowIndex) (seq { 0 .. width grid - 1 })
+                       |> Seq.toArray
                        bar () ]
 
-    let render (grid: GameGrid) =
+    let render grid =
         let ceilingHeight = 4
 
         Array.append
-            (Array.map (fun rowIndex -> renderRow rowIndex grid)
-                 (Array.ofSeq (seq { -ceilingHeight .. grid.Rows.Length - 1 })))
-            [| Array.create (grid.Rows.[0].Length + 2) "=" |]
+            (Seq.map (renderRow grid) (seq { -ceilingHeight .. grid.Rows.Length - 1 })
+             |> Seq.toArray)
+            [| Array.create (width grid + 2) "=" |]
 
-    let private blockCanMoveLeft (gameGrid: GameGrid) =
+    let private blockCanMoveLeft gameGrid =
         match gameGrid.ActiveBlock with
         | None -> false
         | Some activeBlock ->
             let startingX = activeBlock.Location.X
             let startingY = activeBlock.Location.Y
-
-            let firstActiveBlockRowLength =
-                Seq.tryHead activeBlock.Rows
-                |> Option.defaultValue Array.empty
-                |> Array.length
 
             let obstructionToLeftOfColumn columnIndex =
                 if startingX + columnIndex = 0 then
@@ -127,27 +118,17 @@ module GameGrid =
 
                     Seq.exists obstructionToLeftOfCell (seq { 0 .. activeBlock.Rows.Length - 1 })
 
-            not (Seq.exists obstructionToLeftOfColumn (seq { 0 .. firstActiveBlockRowLength - 1 }))
+            not (Seq.exists obstructionToLeftOfColumn (seq { 0 .. Block.width activeBlock - 1 }))
 
-    let private blockCanMoveRight (gameGrid: GameGrid) =
+    let private blockCanMoveRight gameGrid =
         match gameGrid.ActiveBlock with
         | None -> false
         | Some activeBlock ->
             let startingX = activeBlock.Location.X
             let startingY = activeBlock.Location.Y
 
-            let firstRowLength =
-                Seq.tryHead gameGrid.Rows
-                |> Option.defaultValue Array.empty
-                |> Array.length
-
-            let firstActiveBlockRowLength =
-                Seq.tryHead activeBlock.Rows
-                |> Option.defaultValue Array.empty
-                |> Array.length
-
             let obstructionToRightOfColumn columnIndex =
-                if firstRowLength <= startingX + columnIndex + 1 then
+                if width gameGrid <= startingX + columnIndex + 1 then
                     true
                 else
                     let obstructionToRightOfCell rowIndex =
@@ -162,9 +143,9 @@ module GameGrid =
 
                     Seq.exists obstructionToRightOfCell (seq { 0 .. activeBlock.Rows.Length - 1 })
 
-            not (Seq.exists obstructionToRightOfColumn (seq { 0 .. firstActiveBlockRowLength - 1 }))
+            not (Seq.exists obstructionToRightOfColumn (seq { 0 .. Block.width activeBlock - 1 }))
 
-    let private blockCanMoveDown (gameGrid: GameGrid) =
+    let private blockCanMoveDown gameGrid =
         match gameGrid.ActiveBlock with
         | None -> false
         | Some activeBlock ->
@@ -192,9 +173,9 @@ module GameGrid =
 
                     Seq.exists obstructionBelowCell (seq { 0 .. rowLength - 1 })
 
-            not (Seq.exists obstructionBelowRow (seq { 0 .. gameGrid.ActiveBlock.Value.Rows.Length - 1 }))
+            not (Seq.exists obstructionBelowRow (seq { 0 .. activeBlock.Rows.Length - 1 }))
 
-    let private blockCanRotate (gameGrid: GameGrid) =
+    let private blockCanRotate gameGrid =
         match gameGrid.ActiveBlock with
         | None -> false
         | Some activeBlock ->
@@ -242,14 +223,14 @@ module GameGrid =
 
             not (Seq.exists rowHasObstruction (seq { 0 .. rotatedActiveBlock.Rows.Length - 1 }))
 
-    let activeBlockCanMove (gameGrid: GameGrid) (direction: Direction) =
+    let activeBlockCanMove gameGrid direction =
         match direction with
         | Left -> blockCanMoveLeft gameGrid
         | Right -> blockCanMoveRight gameGrid
         | Down -> blockCanMoveDown gameGrid
         | Rotate -> blockCanRotate gameGrid
 
-    let addGameEventHandler (eventHandler: GameEventArgs -> unit) =
+    let addGameEventHandler eventHandler =
         match gameEventObservable with
         | None -> ignore ()
         | Some observable -> observable.Add(eventHandler)

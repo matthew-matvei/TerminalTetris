@@ -4,7 +4,7 @@ open System
 
 module Keys =
 
-    let applyKeyEvent (key: ConsoleKeyInfo) (gameGrid: GameGrid) =
+    let applyKeyEvent (key: ConsoleKeyInfo) gameGrid =
         match key.Key with
         | ConsoleKey.RightArrow -> Move.blockRight gameGrid
         | ConsoleKey.LeftArrow -> Move.blockLeft gameGrid

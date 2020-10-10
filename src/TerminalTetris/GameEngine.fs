@@ -11,7 +11,7 @@ let run (tick: unit -> unit) =
     timer.Value.AutoReset <- true
     timer.Value.Enabled <- true
 
-let waitForKey (keyPressHandler: ConsoleKeyInfo -> unit) =
+let waitForKey keyPressHandler =
     while true do
         Console.ReadKey() |> keyPressHandler
 
@@ -27,7 +27,7 @@ let private stop (_: unit) =
     | None -> ignore ()
     | Some t -> t.Stop()
 
-let handleGameEvent (gameEventArgs: GameEventArgs) =
+let handleGameEvent gameEventArgs =
     match gameEventArgs with
     | RowsCleared _ -> incrementGameSpeed ()
     | GameOver -> stop ()

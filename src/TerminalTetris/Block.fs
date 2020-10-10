@@ -17,11 +17,11 @@ module Block =
     let private numberOfBlockTypes =
         FSharpType.GetUnionCases(typeof<BlockType>).Length
 
-    let private createSquareAt (location: Location) =
+    let private createSquareAt location =
         { Rows = [| [| true; true |]; [| true; true |] |]
           Location = location }
 
-    let private createLineAt (location: Location) =
+    let private createLineAt location =
         { Rows =
               [| [| true |]
                  [| true |]
@@ -29,28 +29,28 @@ module Block =
                  [| true |] |]
           Location = location }
 
-    let private createLAt (location: Location) =
+    let private createLAt location =
         { Rows =
               [| [| false; true |]
                  [| false; true |]
                  [| true; true |] |]
           Location = location }
 
-    let private createTriangleAt (location: Location) =
+    let private createTriangleAt location =
         { Rows =
               [| [| true; false |]
                  [| true; true |]
                  [| true; false |] |]
           Location = location }
 
-    let private createZigZagAt (location: Location) =
+    let private createZigZagAt location =
         { Rows =
               [| [| true; false |]
                  [| true; true |]
                  [| false; true |] |]
           Location = location }
 
-    let createAt (location: Location) blockType =
+    let createAt location blockType =
         match blockType with
         | Square -> createSquareAt location
         | Line -> createLineAt location
@@ -58,7 +58,7 @@ module Block =
         | Triangle -> createTriangleAt location
         | ZigZag -> createZigZagAt location
 
-    let generateRandomAt (location: Location) =
+    let generateRandomAt location =
         let random = Random().Next(numberOfBlockTypes)
         match random with
         | 0 -> createAt location Square
@@ -70,13 +70,13 @@ module Block =
 
     let generateRandom () = generateRandomAt { X = 0; Y = 0 }
 
-    let private newLocation (oldLocation: Location) rowCount columnCount =
+    let private newLocation oldLocation rowCount columnCount =
         let middleX = columnCount / 2
         let middleY = rowCount / 2
         { Location.X = oldLocation.X + middleY - middleX
           Location.Y = oldLocation.Y + middleX - middleY }
 
-    let rotate (block: Block) =
+    let rotate block =
         let columnCount = Array.head block.Rows |> Array.length
 
         let createRowFromColumn columnIndex =
@@ -93,7 +93,7 @@ module Block =
               Rows = newRows
               Location = newLocation block.Location newRowCount newColumnCount }
 
-    let move (direction: Direction) (block: Block) =
+    let move direction block =
         match direction with
         | Left ->
             { block with
@@ -113,10 +113,10 @@ module Block =
         | Rotate -> rotate block
 
     let tryItem row column block =
-        Array.tryItem (int row) block.Rows
-            |> Option.bind (fun item -> Array.tryItem (int column) item)
+        Array.tryItem row block.Rows
+        |> Option.bind (Array.tryItem column)
 
-    let render (block: Block) =
+    let render block =
         let largestHeight = 4
         let largestWidth = 4
 
@@ -133,3 +133,8 @@ module Block =
 
         Seq.map renderRow (seq { 0 .. largestHeight - 1 })
         |> Seq.toArray
+
+    let width block =
+        Array.tryHead block.Rows
+        |> Option.map Array.length
+        |> Option.defaultValue 0
