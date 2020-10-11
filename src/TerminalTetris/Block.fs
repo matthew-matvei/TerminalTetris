@@ -3,8 +3,10 @@ namespace TerminalTetris
 open System
 open Microsoft.FSharp.Reflection
 
+[<Struct>]
 type Block = { Rows: Row []; Location: Location }
 
+[<Struct>]
 type BlockType =
     | Square
     | Line

@@ -2,6 +2,7 @@ module Score
 
 open TerminalTetris
 
+[<Struct>]
 type private State =
     { CurrentScore: uint32
       ScoreIsFinal: bool }

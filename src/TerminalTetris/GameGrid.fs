@@ -1,5 +1,6 @@
 namespace TerminalTetris
 
+[<Struct>]
 type GameGrid =
     { Rows: Row []
       ActiveBlock: Option<Block>
