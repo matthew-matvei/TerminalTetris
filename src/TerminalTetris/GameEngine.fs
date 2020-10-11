@@ -15,14 +15,14 @@ let waitForKey keyPressHandler =
     while true do
         Console.ReadKey() |> keyPressHandler
 
-let private incrementGameSpeed (_: unit) =
+let private incrementGameSpeed () =
     match timer with
     | None -> ignore ()
     | Some t ->
         let decrement = 0.1 * t.Interval
         t.Interval <- t.Interval - decrement
 
-let private stop (_: unit) =
+let private stop () =
     match timer with
     | None -> ignore ()
     | Some t -> t.Stop()

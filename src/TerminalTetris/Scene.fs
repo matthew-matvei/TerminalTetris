@@ -14,7 +14,7 @@ module Scene =
           PreviousNextBlock = None
           PreviousScore = None }
 
-    let getGameGridDimensions (_: Unit) =
+    let getGameGridDimensions () =
         { Dimensions.Height = 10
           Dimensions.Width = 5 }
 
