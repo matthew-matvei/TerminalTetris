@@ -34,7 +34,9 @@ module GameGrid =
           NextBlock = gameGrid.NextBlock
           GameEvent = gameGrid.GameEvent }
 
-    let update gameGrid (updateFunction: GameGrid -> GameGrid) = copy gameGrid |> updateFunction
+    type private UpdateFunction = GameGrid -> GameGrid
+
+    let update gameGrid (updateFunction: UpdateFunction) = copy gameGrid |> updateFunction
 
     let private width gameGrid =
         Array.tryHead gameGrid.Rows

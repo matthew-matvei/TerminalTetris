@@ -62,7 +62,9 @@ module Move =
 
             grid
 
-    let private moveBlockIf move expression gameGrid =
+    type private MoveBlockFunction = Block -> Block
+
+    let private moveBlockIf (move: MoveBlockFunction) expression gameGrid =
         if expression then
             { gameGrid with
                   ActiveBlock = Some(move gameGrid.ActiveBlock.Value) }

@@ -5,7 +5,9 @@ open TerminalTetris
 
 let mutable private timer = Option<Timers.Timer>.None
 
-let run (tick: unit -> unit) =
+type private UnparameterisedCallback = unit -> unit
+
+let run (tick: UnparameterisedCallback) =
     timer <- Some(new Timers.Timer(2000.0))
     timer.Value.Elapsed.Add(fun _ -> tick ())
     timer.Value.AutoReset <- true
