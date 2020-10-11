@@ -237,4 +237,4 @@ module GameGridTests =
         let nextBlock = { Block.Rows = [||]; Block.Location = { X = 0; Y = 0 }}
         let gameGrid = { GameGrid.create { Height = 4; Width = 4 } with NextBlock = nextBlock }
 
-        Assert.Same(nextBlock, (GameGrid.addBlock gameGrid).ActiveBlock.Value)
+        Assert.Equal(nextBlock, (GameGrid.addBlock gameGrid).ActiveBlock.Value)
